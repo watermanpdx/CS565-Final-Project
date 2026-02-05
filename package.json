@@ -1,7 +1,7 @@
 {
   "name": "cs565-final-project",
   "version": "1.0.0",
-  "description": "The following repository contains the implementation and documentation for the Portland State University CS565 final project. It implements a browser-based multi-player [TETRIS](https://en.wikipedia.org/wiki/Tetris) game, in which two players are able to compete against one-another in real-time. It is used to explore and demonstrate frontend and backend web technologies.",
+  "description": "Multi-Player Tetris",
   "main": "index.js",
   "directories": {
     "doc": "docs"
