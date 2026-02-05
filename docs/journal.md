@@ -14,3 +14,5 @@ I initially debated separating out the folder structure into a backend, frontend
 https://tetris.fandom.com/wiki/DTET_Rotation_System
 
 deepcopy https://stackoverflow.com/questions/13756482/create-copy-of-multi-dimensional-array-not-reference-javascript
+
+classes don't hoist?

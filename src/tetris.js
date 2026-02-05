@@ -45,7 +45,7 @@ class Block {
     return gridCopy;
   }
 
-  rotateClockwise() {
+  rotateRight() {
     this.shapesIndex = (this.shapesIndex + 1) % this.shapes.length;
     console.log(this.shapesIndex);
     if (this.checkCollision()) {
@@ -56,7 +56,7 @@ class Block {
     return true;
   }
 
-  rotateCounterClockwise() {
+  rotateLeft() {
     this.shapesIndex =
       (this.shapesIndex - 1 + this.shapes.length) % this.shapes.length;
     if (this.checkCollision()) {
@@ -113,7 +113,7 @@ class Block {
   }
 }
 
-// Derived, specific block classes --------------------------------------------
+// Derived, (specific) block classes ------------------------------------------
 class SquareBlock extends Block {
   constructor(environment) {
     const shapes = [
@@ -125,6 +125,95 @@ class SquareBlock extends Block {
     super(environment, BLOCK_ENUM.SQUARE_BLOCK, 2, shapes, [4, 0]);
   }
 }
+
+class LineBlock extends Block {
+  constructor(environment) {
+    const shapes = [
+      [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0],
+      ],
+      [
+        [0, 0, 1, 0],
+        [0, 0, 1, 0],
+        [0, 0, 1, 0],
+        [0, 0, 1, 0],
+      ],
+      [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0],
+      ],
+      [
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+      ],
+    ];
+    super(environment, BLOCK_ENUM.LINE_BLOCK, 4, shapes, [3, -2]);
+  }
+}
+
+class SBlock extends Block {
+  constructor(environment) {
+    const shapes = [
+      [
+        [0, 0, 0],
+        [0, 1, 1],
+        [1, 1, 0],
+      ],
+      [
+        [0, 1, 0],
+        [0, 1, 1],
+        [0, 0, 1],
+      ],
+      [
+        [0, 0, 0],
+        [0, 1, 1],
+        [1, 1, 0],
+      ],
+      [
+        [1, 0, 0],
+        [1, 1, 0],
+        [0, 1, 0],
+      ],
+    ];
+    super(environment, BLOCK_ENUM.S_BLOCK, 3, shapes, [3, -1]);
+  }
+}
+
+class ZBlock extends Block {
+  constructor(environment) {
+    const shapes = [
+      [
+        [0, 0, 0],
+        [1, 1, 0],
+        [0, 1, 1],
+      ],
+      [
+        [0, 0, 1],
+        [0, 1, 1],
+        [0, 1, 0],
+      ],
+      [
+        [0, 0, 0],
+        [1, 1, 0],
+        [0, 1, 1],
+      ],
+      [
+        [0, 1, 0],
+        [1, 1, 0],
+        [1, 0, 0],
+      ],
+    ];
+    super(environment, BLOCK_ENUM.Z_BLOCK, 3, shapes, [3, -1]);
+  }
+}
+
 class LBlock extends Block {
   constructor(environment) {
     const shapes = [
@@ -139,9 +228,9 @@ class LBlock extends Block {
         [0, 1, 0],
       ],
       [
+        [0, 0, 0],
         [0, 0, 1],
         [1, 1, 1],
-        [0, 0, 0],
       ],
       [
         [0, 1, 0],
@@ -149,26 +238,144 @@ class LBlock extends Block {
         [0, 1, 1],
       ],
     ];
-    super(environment, BLOCK_ENUM.L_BLOCK, 3, shapes, [4, -1]);
+    super(environment, BLOCK_ENUM.L_BLOCK, 3, shapes, [3, -1]);
   }
 }
 
+class JBlock extends Block {
+  constructor(environment) {
+    const shapes = [
+      [
+        [0, 0, 0],
+        [1, 1, 1],
+        [0, 0, 1],
+      ],
+      [
+        [0, 1, 0],
+        [0, 1, 0],
+        [1, 1, 0],
+      ],
+      [
+        [0, 0, 0],
+        [1, 0, 0],
+        [1, 1, 1],
+      ],
+      [
+        [0, 1, 1],
+        [0, 1, 0],
+        [0, 1, 0],
+      ],
+    ];
+    super(environment, BLOCK_ENUM.J_BLOCK, 3, shapes, [3, -1]);
+  }
+}
+
+class TBlock extends Block {
+  constructor(environment) {
+    const shapes = [
+      [
+        [0, 0, 0],
+        [1, 1, 1],
+        [0, 1, 0],
+      ],
+      [
+        [0, 1, 0],
+        [1, 1, 0],
+        [0, 1, 0],
+      ],
+      [
+        [0, 0, 0],
+        [0, 1, 0],
+        [1, 1, 1],
+      ],
+      [
+        [0, 1, 0],
+        [0, 1, 1],
+        [0, 1, 0],
+      ],
+    ];
+    super(environment, BLOCK_ENUM.T_BLOCK, 3, shapes, [3, -1]);
+  }
+}
+
+// Core game class ------------------------------------------------------------
+const BLOCKS = [SquareBlock, LineBlock, SBlock, ZBlock, LBlock, JBlock, TBlock];
 class Tetris {
   constructor() {
+    this.init();
+
+    // debug game run
+    this.render(this.grid);
+    this.interval = setInterval(() => {
+      this.update();
+    }, 500);
+  }
+
+  init() {
+    // construct and zero board
     this.grid = Array(GRID_HEIGHT)
       .fill(null)
       .map(() => {
         return Array(GRID_WIDTH).fill(0);
       });
-    this.block = new LBlock(this, 0, 0);
-    this.render();
+
+    // choose random block and next block
+    this.block = this.getRandomBlock();
+    this.nextBlock = this.getRandomBlock();
+
+    this.score = 0;
   }
 
-  update() {}
+  getRandomBlock() {
+    let i = Math.floor(Math.random() * BLOCKS.length);
+    return new BLOCKS[i](this);
+  }
 
-  render() {
+  moveLeft() {
+    this.block.moveLeft();
+  }
+
+  moveRight() {
+    this.block.moveRight();
+  }
+
+  moveDown() {
+    this.block.moveDown();
+  }
+
+  rotateLeft() {
+    this.block.rotateLeft();
+  }
+
+  rotateRight() {
+    this.block.rotateRight();
+  }
+
+  update() {
+    // drop block (gravity)
+    const landed = !this.block.moveDown();
+
+    // calculate new screen
     let grid = this.block.draw();
 
+    // check if block landed. If so, store "base" screen and generate new block
+    if (landed) {
+      this.grid = grid;
+      this.block = this.nextBlock;
+      this.nextBlock = this.getRandomBlock();
+
+      // check game-over
+      if (this.block.checkCollision()) {
+        clearInterval(this.interval);
+      }
+    }
+
+    // update screen
+    this.render(grid);
+  }
+
+  render(grid) {
+    console.log("-------------------");
     for (let j = 0; j < GRID_HEIGHT; j++) {
       let string = "";
       for (let i = 0; i < GRID_WIDTH; i++) {
@@ -179,4 +386,5 @@ class Tetris {
   }
 }
 
+// export for use in other files
 module.exports = Tetris;
