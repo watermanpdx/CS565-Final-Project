@@ -26,10 +26,47 @@ function GameWindow() {
   const game = new Tetris();
   const [grid, setGrid] = useState(game.init());
 
+  // handle user input
+  useEffect(() => {
+    const handleEvent = (event) => {
+      event.preventDefault();
+      switch (event.key) {
+        case "ArrowLeft":
+          game.moveLeft();
+          console.log("left-press");
+          break;
+
+        case "ArrowRight":
+          game.moveRight();
+          console.log("right-press");
+          break;
+
+        case "ArrowDown":
+          game.moveDown();
+          console.log("down-press");
+          break;
+
+        case " ":
+          game.rotateRight();
+          console.log("space-press");
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleEvent);
+    return () => {
+      window.removeEventListener("keydown", handleEvent);
+    };
+  }, []);
+
+  // (temporary) call game update()
   useEffect(() => {
     setInterval(() => {
       setGrid(game.update());
-    }, 500);
+    }, 20);
   }, []);
 
   return (

@@ -18,3 +18,7 @@ deepcopy https://stackoverflow.com/questions/13756482/create-copy-of-multi-dimen
 classes don't hoist?
 
 https://create-react-app.dev/docs/getting-started/
+
+https://stackoverflow.com/questions/27827234/how-to-handle-the-onkeypress-event-in-reactjs
+
+removing event listeners: https://www.pluralsight.com/resources/blog/guides/event-listeners-in-react-components

@@ -3,6 +3,7 @@
 // Global constants -----------------------------------------------------------
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 20;
+const START_SPEED = 35; // ticks per drop. Higher = slower
 const BLOCK_ENUM = {
   NONE: 0,
   SQUARE_BLOCK: 1,
@@ -47,7 +48,6 @@ class Block {
 
   rotateRight() {
     this.shapesIndex = (this.shapesIndex + 1) % this.shapes.length;
-    console.log(this.shapesIndex);
     if (this.checkCollision()) {
       this.shapesIndex =
         (this.shapesIndex - 1 + this.shapes.length) % this.shapes.length;
@@ -315,6 +315,8 @@ class Tetris {
     this.block = this.getRandomBlock();
     this.nextBlock = this.getRandomBlock();
 
+    this.speed = START_SPEED;
+    this.speedTick = 0;
     this.score = 0;
 
     return this.grid;
@@ -347,7 +349,12 @@ class Tetris {
 
   update() {
     // drop block (gravity)
-    const landed = !this.block.moveDown();
+    this.speedTick += 1;
+    let landed = false;
+    if (this.speedTick >= this.speed) {
+      landed = !this.block.moveDown();
+      this.speedTick = 0;
+    }
 
     // calculate new screen
     let grid = this.block.draw();
