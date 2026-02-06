@@ -25,6 +25,8 @@ function GameWindow() {
 
   const game = new Tetris();
   const [grid, setGrid] = useState(game.init());
+  const [score, setScore] = useState(0);
+  const [nextBlock, setNextBlock] = useState();
 
   // handle user input
   useEffect(() => {
@@ -33,22 +35,18 @@ function GameWindow() {
       switch (event.key) {
         case "ArrowLeft":
           game.moveLeft();
-          console.log("left-press");
           break;
 
         case "ArrowRight":
           game.moveRight();
-          console.log("right-press");
           break;
 
         case "ArrowDown":
           game.moveDown();
-          console.log("down-press");
           break;
 
         case " ":
           game.rotateRight();
-          console.log("space-press");
           break;
 
         default:

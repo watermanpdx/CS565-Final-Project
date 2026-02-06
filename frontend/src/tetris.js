@@ -4,6 +4,7 @@
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 20;
 const START_SPEED = 35; // ticks per drop. Higher = slower
+const SCORE_MULTIPLIER = [0, 40, 100, 300, 1200];
 const BLOCK_ENUM = {
   NONE: 0,
   SQUARE_BLOCK: 1,
@@ -317,6 +318,8 @@ class Tetris {
 
     this.speed = START_SPEED;
     this.speedTick = 0;
+
+    this.level = 0;
     this.score = 0;
 
     return this.grid;
@@ -365,12 +368,42 @@ class Tetris {
       this.block = this.nextBlock;
       this.nextBlock = this.getRandomBlock();
 
+      this.clearLines();
+
       // check game-over
       if (this.block.checkCollision()) {
       }
     }
 
     return grid;
+  }
+
+  clearLines() {
+    let count = 0;
+
+    // check for completed lines
+    for (let j = 0; j < GRID_HEIGHT; j++) {
+      let complete = true;
+      for (let i = 0; i < GRID_WIDTH; i++) {
+        if (this.grid[j][i] <= 0) {
+          complete = false;
+          break;
+        }
+      }
+
+      // if complete clear and increment count
+      if (complete) {
+        count += 1;
+        this.grid.splice(j, 1);
+        this.grid.unshift(Array(GRID_WIDTH).fill(0));
+      }
+    }
+
+    // update score
+    if (count < 5) {
+      this.score += SCORE_MULTIPLIER[count] * (this.level + 1);
+    }
+    console.log(this.score);
   }
 }
 
