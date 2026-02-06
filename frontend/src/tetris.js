@@ -301,15 +301,7 @@ class TBlock extends Block {
 // Core game class ------------------------------------------------------------
 const BLOCKS = [SquareBlock, LineBlock, SBlock, ZBlock, LBlock, JBlock, TBlock];
 class Tetris {
-  constructor() {
-    this.init();
-
-    // debug game run
-    this.render(this.grid);
-    this.interval = setInterval(() => {
-      this.update();
-    }, 500);
-  }
+  constructor() {}
 
   init() {
     // construct and zero board
@@ -324,6 +316,8 @@ class Tetris {
     this.nextBlock = this.getRandomBlock();
 
     this.score = 0;
+
+    return this.grid;
   }
 
   getRandomBlock() {
@@ -366,23 +360,10 @@ class Tetris {
 
       // check game-over
       if (this.block.checkCollision()) {
-        clearInterval(this.interval);
       }
     }
 
-    // update screen
-    this.render(grid);
-  }
-
-  render(grid) {
-    console.log("-------------------");
-    for (let j = 0; j < GRID_HEIGHT; j++) {
-      let string = "";
-      for (let i = 0; i < GRID_WIDTH; i++) {
-        string += `${grid[j][i]} `;
-      }
-      console.log(string);
-    }
+    return grid;
   }
 }
 
