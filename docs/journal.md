@@ -11,7 +11,7 @@ I initially debated separating out the folder structure into a backend, frontend
 
 ## Game "Engine"
 
-Branch: [`tetris-engine`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/tetris-engine)
+Branch: [`feature/tetris-engine`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/tetris-engine)
 Commit: [ac9fc39](https://github.com/watermanpdx/CS565-Final-Project/commit/ac9fc398c7e15015450610869017b57e9344cc54)
 
 In this update I chose to first focus on the implementation of the base TETRIS implementation. As the website will be a multi-player TETRIS game, this is a core feature which is foundational to the purpose of the site, and must be available (at least in an initial form) to build the other features off of.
@@ -35,3 +35,9 @@ Some minor challenges I encountered worth noting. My internal game state (the gr
 I also learned that `classes` do not "hoist". That is, `classes` cannot be referenced above their implementation. I therefore had to pay attention to both where I implemented by derived and used `classes`, but also had to make sure the `export` declaration for `Tetris` was at the bottom of the file. I'm still not convinced that there may be some clever trick or better practice to bring this to the top... I plan to revisit this later in final code review; it works but I don't like that seeing what is exported requires navigating all the way to the bottom of the file...
 
 Last, I ended this update without implementing rendering of the score, and showing the "next" block. My growing feeling is that these pieces may be their own components in React, and that I may be building too many frontend-to-`tetris.js` dependencies. Rather than continuing development of these features in this update, I've chosen to leave it as-is for now, and instead focus on the Socket.IO separation next. In the next major update I want to split out the frontend and backend concerns over Socket.IO and complete the full game rendering in React.
+
+## Socket-IO Communication
+
+https://socket.io/how-to/use-with-react
+
+remark on port conflicts...

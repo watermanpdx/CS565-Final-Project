@@ -1,9 +1,16 @@
-.game-row {
+.game-window {
   display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 10px;
 }
 
 .game-grid {
   display: inline-block;
+}
+
+.game-row {
+  display: flex;
 }
 
 .game-cell {

@@ -3,7 +3,9 @@
 // Global constants -----------------------------------------------------------
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 20;
-const START_SPEED = 35; // ticks per drop. Higher = slower
+const NEXT_WIDTH = 4;
+const NEXT_HEIGHT = 4;
+const START_SPEED = 30; // ticks per drop. Higher = slower
 const SCORE_MULTIPLIER = [0, 40, 100, 300, 1200];
 const BLOCK_ENUM = {
   NONE: 0,
@@ -18,7 +20,14 @@ const BLOCK_ENUM = {
 
 // Block (base) class ---------------------------------------------------------
 class Block {
-  constructor(environment, blockType, size, shapes, initPosition = [0, 0]) {
+  constructor(
+    environment,
+    blockType,
+    size,
+    shapes,
+    initPosition = [0, 0],
+    nextPosition = [0, 0],
+  ) {
     this.env = environment;
     this.blockType = blockType;
     this.size = size;
@@ -26,6 +35,10 @@ class Block {
     this.shapesIndex = 0;
     this.x = initPosition[0];
     this.y = initPosition[1];
+    this.nextX = nextPosition[0];
+    this.nextY = nextPosition[1];
+
+    this.miniGrid = this.drawMiniGrid();
   }
 
   draw() {
@@ -45,6 +58,30 @@ class Block {
       }
     }
     return gridCopy;
+  }
+
+  drawMiniGrid() {
+    const grid = Array(NEXT_HEIGHT)
+      .fill(null)
+      .map(() => {
+        return Array(NEXT_WIDTH).fill(0);
+      });
+    const shape = this.shapes[0];
+    for (let j = 0; j < this.size; j++) {
+      for (let i = 0; i < this.size; i++) {
+        if (
+          shape[j][i] > 0 &&
+          this.nextY + j >= 0 &&
+          this.nextY + j < GRID_HEIGHT &&
+          this.nextX + i >= 0 &&
+          this.nextX + i < GRID_WIDTH
+        ) {
+          grid[this.nextY + j][this.nextX + i] = this.blockType;
+        }
+      }
+    }
+
+    return grid;
   }
 
   rotateRight() {
@@ -123,7 +160,7 @@ class SquareBlock extends Block {
         [1, 1],
       ],
     ];
-    super(environment, BLOCK_ENUM.SQUARE_BLOCK, 2, shapes, [4, 0]);
+    super(environment, BLOCK_ENUM.SQUARE_BLOCK, 2, shapes, [4, 0], [1, 1]);
   }
 }
 
@@ -155,7 +192,7 @@ class LineBlock extends Block {
         [0, 1, 0, 0],
       ],
     ];
-    super(environment, BLOCK_ENUM.LINE_BLOCK, 4, shapes, [3, -2]);
+    super(environment, BLOCK_ENUM.LINE_BLOCK, 4, shapes, [3, -2], [0, 0]);
   }
 }
 
@@ -183,7 +220,7 @@ class SBlock extends Block {
         [0, 1, 0],
       ],
     ];
-    super(environment, BLOCK_ENUM.S_BLOCK, 3, shapes, [3, -1]);
+    super(environment, BLOCK_ENUM.S_BLOCK, 3, shapes, [3, -1], [0, 0]);
   }
 }
 
@@ -211,7 +248,7 @@ class ZBlock extends Block {
         [1, 0, 0],
       ],
     ];
-    super(environment, BLOCK_ENUM.Z_BLOCK, 3, shapes, [3, -1]);
+    super(environment, BLOCK_ENUM.Z_BLOCK, 3, shapes, [3, -1], [0, 0]);
   }
 }
 
@@ -239,7 +276,7 @@ class LBlock extends Block {
         [0, 1, 1],
       ],
     ];
-    super(environment, BLOCK_ENUM.L_BLOCK, 3, shapes, [3, -1]);
+    super(environment, BLOCK_ENUM.L_BLOCK, 3, shapes, [3, -1], [0, 0]);
   }
 }
 
@@ -267,7 +304,7 @@ class JBlock extends Block {
         [0, 1, 0],
       ],
     ];
-    super(environment, BLOCK_ENUM.J_BLOCK, 3, shapes, [3, -1]);
+    super(environment, BLOCK_ENUM.J_BLOCK, 3, shapes, [3, -1], [0, 0]);
   }
 }
 
@@ -295,7 +332,7 @@ class TBlock extends Block {
         [0, 1, 0],
       ],
     ];
-    super(environment, BLOCK_ENUM.T_BLOCK, 3, shapes, [3, -1]);
+    super(environment, BLOCK_ENUM.T_BLOCK, 3, shapes, [3, -1], [0, 0]);
   }
 }
 
@@ -322,7 +359,11 @@ class Tetris {
     this.level = 0;
     this.score = 0;
 
-    return this.grid;
+    return {
+      grid: this.grid,
+      score: this.score,
+      next: this.nextBlock.miniGrid,
+    };
   }
 
   getRandomBlock() {
@@ -375,7 +416,8 @@ class Tetris {
       }
     }
 
-    return grid;
+    // return full game state
+    return { grid: grid, score: this.score, next: this.nextBlock.miniGrid };
   }
 
   clearLines() {
@@ -403,7 +445,6 @@ class Tetris {
     if (count < 5) {
       this.score += SCORE_MULTIPLIER[count] * (this.level + 1);
     }
-    console.log(this.score);
   }
 }
 

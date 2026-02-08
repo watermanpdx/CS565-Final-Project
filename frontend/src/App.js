@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import { socket } from "./socket";
 import "./App.css";
 import "./Tetris.css";
-const Tetris = require("./tetris.js");
 
 function App() {
   return (
@@ -12,6 +12,28 @@ function App() {
 }
 
 function GameWindow() {
+  const GRID_WIDTH = 10;
+  const GRID_HEIGHT = 20;
+  const [grid, setGrid] = useState(
+    Array(GRID_HEIGHT)
+      .fill(null)
+      .map(() => {
+        return Array(GRID_WIDTH).fill(0);
+      }),
+  );
+
+  const NEXT_WIDTH = 4;
+  const NEXT_HEIGHT = 4;
+  const [nextBlock, setNextBlock] = useState(
+    Array(NEXT_HEIGHT)
+      .fill(null)
+      .map(() => {
+        return Array(NEXT_WIDTH).fill(0);
+      }),
+  );
+
+  const [score, setScore] = useState(0);
+
   const BLOCK_TYPES = [
     "block-none",
     "square-block",
@@ -23,10 +45,32 @@ function GameWindow() {
     "t-block",
   ];
 
-  const game = new Tetris();
-  const [grid, setGrid] = useState(game.init());
-  const [score, setScore] = useState(0);
-  const [nextBlock, setNextBlock] = useState();
+  // handle socket.io communication
+  useEffect(() => {
+    function onConnect() {
+      console.log("connected!");
+    }
+
+    function renderGrid(data) {
+      setGrid(data.grid);
+
+      if (score !== data.score) {
+        setScore(data.score);
+      }
+
+      if (nextBlock !== data.next) {
+        setNextBlock(data.next);
+      }
+    }
+
+    socket.on("connect", onConnect);
+    socket.on("render", renderGrid);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("render", renderGrid);
+    };
+  }, []);
 
   // handle user input
   useEffect(() => {
@@ -34,19 +78,27 @@ function GameWindow() {
       event.preventDefault();
       switch (event.key) {
         case "ArrowLeft":
-          game.moveLeft();
+        case "a":
+          socket.emit("moveLeft");
           break;
 
         case "ArrowRight":
-          game.moveRight();
+        case "d":
+          socket.emit("moveRight");
           break;
 
         case "ArrowDown":
-          game.moveDown();
+        case "s":
+          socket.emit("moveDown");
           break;
 
         case " ":
-          game.rotateRight();
+        case "e":
+          socket.emit("rotateRight");
+          break;
+
+        case "q":
+          socket.emit("rotateLeft");
           break;
 
         default:
@@ -60,13 +112,20 @@ function GameWindow() {
     };
   }, []);
 
-  // (temporary) call game update()
-  useEffect(() => {
-    setInterval(() => {
-      setGrid(game.update());
-    }, 20);
-  }, []);
+  return (
+    <>
+      <div className="game-window">
+        <BlockZone grid={grid} BLOCK_TYPES={BLOCK_TYPES} />
+        <div>
+          <BlockZone grid={nextBlock} BLOCK_TYPES={BLOCK_TYPES} />
+          <ScoreBoard score={score} />
+        </div>
+      </div>
+    </>
+  );
+}
 
+function BlockZone({ grid, BLOCK_TYPES }) {
   return (
     <div className="game-grid">
       {grid.map((row, i) => (
@@ -81,6 +140,10 @@ function GameWindow() {
       ))}
     </div>
   );
+}
+
+function ScoreBoard({ score }) {
+  return <div className="score-board">Score: {score}</div>;
 }
 
 export default App;
