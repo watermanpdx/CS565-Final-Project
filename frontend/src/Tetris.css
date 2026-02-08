@@ -1,0 +1,46 @@
+.game-row {
+  display: flex;
+}
+
+.game-grid {
+  display: inline-block;
+}
+
+.game-cell {
+  width: 20px;
+  height: 20px;
+  border: 1px solid black;
+  box-sizing: border-box;
+}
+
+.block-none {
+  background-color: black;
+}
+
+.square-block {
+  background-color: white;
+}
+
+.line-block {
+  background-color: blue;
+}
+
+.s-block {
+  background-color: green;
+}
+
+.z-block {
+  background-color: orange;
+}
+
+.l-block {
+  background-color: pink;
+}
+
+.j-block {
+  background-color: purple;
+}
+
+.t-block {
+  background-color: red;
+}
