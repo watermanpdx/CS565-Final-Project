@@ -39,7 +39,7 @@ Last, I ended this update without implementing rendering of the score, and showi
 ## Socket-IO Communication
 
 Branch: [`feature/socket-io`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/socket-io)
-Commit: []()
+Commit: [4bda80f](https://github.com/watermanpdx/CS565-Final-Project/commit/4bda80f345780962bdb2cede665ceb26f0002d79)
 
 In this update I moved the contents of `tetris.js` out of the frontend and back into the backend and passed the game information and envents between the two via Socket.IO. For this pass (remaining single-player) this actually ended up being a lot easier than anticipated. Since the `tetris.js` already exposed interactions with its main Tetris class via methods, it was very straight-forward to simply wrap these in socket.io events. In example, originally where the on-key events in the frontend would wrap calls to the game object methods, they now simply wrap socket.io `emit` calls on the frontend, and the game object method calls are wrapped in the socket `on` events.
 
