@@ -38,12 +38,13 @@ Last, I ended this update without implementing rendering of the score, and showi
 
 ## Socket-IO Communication
 
+Branch: [`feature/socket-io`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/socket-io)
+Commit: []()
+
 In this update I moved the contents of `tetris.js` out of the frontend and back into the backend and passed the game information and envents between the two via Socket.IO. For this pass (remaining single-player) this actually ended up being a lot easier than anticipated. Since the `tetris.js` already exposed interactions with its main Tetris class via methods, it was very straight-forward to simply wrap these in socket.io events. In example, originally where the on-key events in the frontend would wrap calls to the game object methods, they now simply wrap socket.io `emit` calls on the frontend, and the game object method calls are wrapped in the socket `on` events.
 
 I ran into some minor challenges getting the socket.io communication initially set up. However, I found that this was mostly "overthinking" how I expected socket.io to work. I initially was under the impression that the socket port and the webpage port needed to be different, which resulted in overly complicated, non-functional code. What I learned was that the socket.io _protocol_ (above the IP layer) differs http; and can therefore coexist on the same port. This made the code substantially simpler. I likewise learned through inspection of the `socket.id` that the id is not that of the _client_ or of the _server_ but the socket.io connection itself. This didn't cause any issues, but rather was just contrary to my initial understanding.
 
 For the initial setup of socket.io, I relied heavily on a [Socket.IO with React Tutorial](https://socket.io/how-to/use-with-react) for learning how to implement socket.io communication for the frontent.
 
-Although the focus of this update was on implementing Socket.IO, I also made some progress in the React code for the frontend. In including the "next block" mini-screen and the score + "game over" text, I was able to break down the React code into more granular components. The modular "component" approach in React is turning out to be very useful
-
-remark on port conflicts...
+Although the focus of this update was on implementing Socket.IO, I also made some progress in the React code for the frontend. In including the "next block" mini-screen and the score + "game over" text, I was able to break down the React code into more granular components. The modular "component" approach in React is turning out to be very useful. It allows for the webpage to be broken down into small, digestible pieces, and easily reorderd or duplicated in higher structures. This helped with the game rendering for the main and "next block" mini-screen. It allowed me to build each individually, and once working, easily orient them against one-another in the parent component. I'm really curious to see how fleshing out the rest of the frontend will go using React. In the next step, I intend to focus on structuring the overall frontend webpage in React.
