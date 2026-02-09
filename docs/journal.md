@@ -48,3 +48,11 @@ I ran into some minor challenges getting the socket.io communication initially s
 For the initial setup of socket.io, I relied heavily on a [Socket.IO with React Tutorial](https://socket.io/how-to/use-with-react) for learning how to implement socket.io communication for the frontent.
 
 Although the focus of this update was on implementing Socket.IO, I also made some progress in the React code for the frontend. In including the "next block" mini-screen and the score + "game over" text, I was able to break down the React code into more granular components. The modular "component" approach in React is turning out to be very useful. It allows for the webpage to be broken down into small, digestible pieces, and easily reorderd or duplicated in higher structures. This helped with the game rendering for the main and "next block" mini-screen. It allowed me to build each individually, and once working, easily orient them against one-another in the parent component. I'm really curious to see how fleshing out the rest of the frontend will go using React. In the next step, I intend to focus on structuring the overall frontend webpage in React.
+
+## Frontend Update
+
+https://react-bootstrap.netlify.app/docs/getting-started/introduction
+
+https://react-bootstrap.netlify.app/docs/components/navbar
+
+https://react-bootstrap.netlify.app/docs/components/modal
