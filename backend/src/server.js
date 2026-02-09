@@ -1,6 +1,65 @@
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 5001;
+const http = require("http");
+const server = http.createServer(app);
+const port = process.env.PORT || 3001;
+
+const Tetris = require("./tetris.js");
+const game = new Tetris();
+const GAME_PERIOD = 20; //ms
+let gameRunning = false;
+let gameInterval = null;
+
+const { Server } = require("socket.io");
+const io = new Server(server);
+
+// Socket.IO communication
+const interval = null;
+io.on("connection", (socket) => {
+  console.log(`Connected to socket.id: ${socket.id}`);
+  if (!gameRunning) {
+    startGame();
+  }
+
+  socket.on("moveLeft", (socket) => {
+    game.moveLeft();
+  });
+
+  socket.on("moveRight", (socket) => {
+    game.moveRight();
+  });
+
+  socket.on("moveDown", (socket) => {
+    game.moveDown();
+  });
+
+  socket.on("rotateLeft", (socket) => {
+    game.rotateLeft();
+  });
+
+  socket.on("rotateRight", (socket) => {
+    game.rotateRight();
+  });
+
+  socket.emit("render", game.init());
+});
+
+io.on("disconnect", (socket) => {});
+
+function startGame() {
+  gameInterval = setInterval(() => {
+    io.emit("render", game.update());
+  }, GAME_PERIOD);
+  gameRunning = true;
+}
+
+function stopGame() {
+  if (gameInterval) {
+    clearInterval(interval);
+    gameInterval = null;
+    gameRunning = false;
+  }
+}
 
 // Hello world
 app.get("/", (req, res) => {
@@ -10,6 +69,6 @@ app.get("/", (req, res) => {
 });
 
 // Start server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });

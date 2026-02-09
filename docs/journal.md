@@ -11,7 +11,7 @@ I initially debated separating out the folder structure into a backend, frontend
 
 ## Game "Engine"
 
-Branch: [`tetris-engine`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/tetris-engine)
+Branch: [`feature/tetris-engine`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/tetris-engine)
 Commit: [ac9fc39](https://github.com/watermanpdx/CS565-Final-Project/commit/ac9fc398c7e15015450610869017b57e9344cc54)
 
 In this update I chose to first focus on the implementation of the base TETRIS implementation. As the website will be a multi-player TETRIS game, this is a core feature which is foundational to the purpose of the site, and must be available (at least in an initial form) to build the other features off of.
@@ -35,3 +35,16 @@ Some minor challenges I encountered worth noting. My internal game state (the gr
 I also learned that `classes` do not "hoist". That is, `classes` cannot be referenced above their implementation. I therefore had to pay attention to both where I implemented by derived and used `classes`, but also had to make sure the `export` declaration for `Tetris` was at the bottom of the file. I'm still not convinced that there may be some clever trick or better practice to bring this to the top... I plan to revisit this later in final code review; it works but I don't like that seeing what is exported requires navigating all the way to the bottom of the file...
 
 Last, I ended this update without implementing rendering of the score, and showing the "next" block. My growing feeling is that these pieces may be their own components in React, and that I may be building too many frontend-to-`tetris.js` dependencies. Rather than continuing development of these features in this update, I've chosen to leave it as-is for now, and instead focus on the Socket.IO separation next. In the next major update I want to split out the frontend and backend concerns over Socket.IO and complete the full game rendering in React.
+
+## Socket-IO Communication
+
+Branch: [`feature/socket-io`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/socket-io)
+Commit: [4bda80f](https://github.com/watermanpdx/CS565-Final-Project/commit/4bda80f345780962bdb2cede665ceb26f0002d79)
+
+In this update I moved the contents of `tetris.js` out of the frontend and back into the backend and passed the game information and envents between the two via Socket.IO. For this pass (remaining single-player) this actually ended up being a lot easier than anticipated. Since the `tetris.js` already exposed interactions with its main Tetris class via methods, it was very straight-forward to simply wrap these in socket.io events. In example, originally where the on-key events in the frontend would wrap calls to the game object methods, they now simply wrap socket.io `emit` calls on the frontend, and the game object method calls are wrapped in the socket `on` events.
+
+I ran into some minor challenges getting the socket.io communication initially set up. However, I found that this was mostly "overthinking" how I expected socket.io to work. I initially was under the impression that the socket port and the webpage port needed to be different, which resulted in overly complicated, non-functional code. What I learned was that the socket.io _protocol_ (above the IP layer) differs http; and can therefore coexist on the same port. This made the code substantially simpler. I likewise learned through inspection of the `socket.id` that the id is not that of the _client_ or of the _server_ but the socket.io connection itself. This didn't cause any issues, but rather was just contrary to my initial understanding.
+
+For the initial setup of socket.io, I relied heavily on a [Socket.IO with React Tutorial](https://socket.io/how-to/use-with-react) for learning how to implement socket.io communication for the frontent.
+
+Although the focus of this update was on implementing Socket.IO, I also made some progress in the React code for the frontend. In including the "next block" mini-screen and the score + "game over" text, I was able to break down the React code into more granular components. The modular "component" approach in React is turning out to be very useful. It allows for the webpage to be broken down into small, digestible pieces, and easily reorderd or duplicated in higher structures. This helped with the game rendering for the main and "next block" mini-screen. It allowed me to build each individually, and once working, easily orient them against one-another in the parent component. I'm really curious to see how fleshing out the rest of the frontend will go using React. In the next step, I intend to focus on structuring the overall frontend webpage in React.
