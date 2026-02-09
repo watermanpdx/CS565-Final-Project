@@ -33,6 +33,7 @@ function GameWindow() {
   );
 
   const [score, setScore] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
 
   const BLOCK_TYPES = [
     "block-none",
@@ -48,19 +49,14 @@ function GameWindow() {
   // handle socket.io communication
   useEffect(() => {
     function onConnect() {
-      console.log("connected!");
+      console.log(`Connected to socket.id: ${socket.id}`);
     }
 
     function renderGrid(data) {
       setGrid(data.grid);
-
-      if (score !== data.score) {
-        setScore(data.score);
-      }
-
-      if (nextBlock !== data.next) {
-        setNextBlock(data.next);
-      }
+      setScore(data.score);
+      setNextBlock(data.next);
+      setGameOver(data.gameOver);
     }
 
     socket.on("connect", onConnect);
@@ -119,6 +115,7 @@ function GameWindow() {
         <div>
           <BlockZone grid={nextBlock} BLOCK_TYPES={BLOCK_TYPES} />
           <ScoreBoard score={score} />
+          <GameOver gameOver={gameOver} />
         </div>
       </div>
     </>
@@ -144,6 +141,15 @@ function BlockZone({ grid, BLOCK_TYPES }) {
 
 function ScoreBoard({ score }) {
   return <div className="score-board">Score: {score}</div>;
+}
+
+function GameOver({ gameOver }) {
+  let response = "";
+  if (gameOver) {
+    response = "GAME OVER";
+  }
+
+  return <div className="game-over">{response}</div>;
 }
 
 export default App;

@@ -339,8 +339,6 @@ class TBlock extends Block {
 // Core game class ------------------------------------------------------------
 const BLOCKS = [SquareBlock, LineBlock, SBlock, ZBlock, LBlock, JBlock, TBlock];
 class Tetris {
-  constructor() {}
-
   init() {
     // construct and zero board
     this.grid = Array(GRID_HEIGHT)
@@ -358,6 +356,7 @@ class Tetris {
 
     this.level = 0;
     this.score = 0;
+    this.gameOver = false;
 
     return {
       grid: this.grid,
@@ -392,32 +391,46 @@ class Tetris {
   }
 
   update() {
-    // drop block (gravity)
-    this.speedTick += 1;
-    let landed = false;
-    if (this.speedTick >= this.speed) {
-      landed = !this.block.moveDown();
-      this.speedTick = 0;
-    }
+    let grid = this.grid;
 
-    // calculate new screen
-    let grid = this.block.draw();
+    if (!this.gameOver) {
+      // drop block (gravity)
+      let landed = false;
+      this.speedTick += 1;
+      if (this.speedTick >= this.speed) {
+        landed = !this.block.moveDown();
+        this.speedTick = 0;
+      }
 
-    // check if block landed. If so, store "base" screen and generate new block
-    if (landed) {
-      this.grid = grid;
-      this.block = this.nextBlock;
-      this.nextBlock = this.getRandomBlock();
+      // calculate new screen
+      grid = this.block.draw();
 
-      this.clearLines();
+      // check if block landed. If so, store "base" screen and generate new block
+      if (landed) {
+        this.grid = grid;
+        this.block = this.nextBlock;
+        this.nextBlock = this.getRandomBlock();
 
-      // check game-over
-      if (this.block.checkCollision()) {
+        this.clearLines();
+
+        // check game-over (block "landed" and colliding)
+        if (this.block.checkCollision()) {
+          // draw last colliding block (so user sees what happened)
+          grid = this.block.draw();
+          this.grid = grid;
+
+          this.gameOver = true;
+        }
       }
     }
 
     // return full game state
-    return { grid: grid, score: this.score, next: this.nextBlock.miniGrid };
+    return {
+      grid: grid,
+      next: this.nextBlock.miniGrid,
+      score: this.score,
+      gameOver: this.gameOver,
+    };
   }
 
   clearLines() {

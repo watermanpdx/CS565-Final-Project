@@ -11,16 +11,12 @@ let gameRunning = false;
 let gameInterval = null;
 
 const { Server } = require("socket.io");
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
-});
+const io = new Server(server);
 
 // Socket.IO communication
 const interval = null;
 io.on("connection", (socket) => {
-  console.log("client connected!");
+  console.log(`Connected to socket.id: ${socket.id}`);
   if (!gameRunning) {
     startGame();
   }
