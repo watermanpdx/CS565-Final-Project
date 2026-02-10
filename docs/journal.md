@@ -56,3 +56,9 @@ https://react-bootstrap.netlify.app/docs/getting-started/introduction
 https://react-bootstrap.netlify.app/docs/components/navbar
 
 https://react-bootstrap.netlify.app/docs/components/modal
+
+https://react-bootstrap.netlify.app/docs/forms/overview
+
+React components (including variables) must be uppercase ?! https://legacy.reactjs.org/docs/components-and-props.html
+
+Ping-ponging where to manage states/data; tradeoff of clutter in parents vs control

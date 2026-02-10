@@ -1,6 +1,7 @@
 .game-window {
   display: flex;
   align-items: flex-start;
+  width: 300px;
   gap: 10px;
   margin: 10px;
 }

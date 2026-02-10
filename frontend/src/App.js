@@ -2,47 +2,150 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Tetris from "./Tetris.js";
 
+import { useState } from "react";
+
 import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-
-import { useState } from "react";
+import NavDropdown from "react-bootstrap/NavDropdown";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
+import Card from "react-bootstrap/Card";
 
 export default function App() {
   const [showHowTo, setShowHowTo] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
-  const handleCloseHowTo = () => setShowHowTo(false);
-  const handleShowHowTo = () => setShowHowTo(true);
-  const handleCloseAbout = () => setShowAbout(false);
-  const handleShowAbout = () => setShowAbout(true);
+  // Prevent game from overtaking keyboard for modals
+  // TODO narrow focus to prevent other effects
+  const gameFocus = !(showHowTo || showAbout || showLogin);
 
   return (
     <>
-      <Navbar expand="lg" className="bg-body-tertiary" data-bs-theme="dark">
+      <Navbar expand="md" className="bg-body-tertiary" data-bs-theme="dark">
         <Container>
           <Navbar.Brand href="#home">Multi-Player Tetris</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
               <Nav.Link href="#home">Home</Nav.Link>
-              <Nav.Link onClick={handleShowHowTo}>How-to-Play</Nav.Link>
+              <Nav.Link
+                onClick={() => {
+                  setShowHowTo(true);
+                }}
+              >
+                How-To-Play
+              </Nav.Link>
               <Nav.Link>Leaderboard</Nav.Link>
-              <Nav.Link onClick={handleShowAbout}>About</Nav.Link>
+              <Nav.Link
+                onClick={() => {
+                  setShowAbout(true);
+                }}
+              >
+                About
+              </Nav.Link>
+
+              <NavDropdown title="Username" id="basic-nav-dropdown">
+                <NavDropdown.Item
+                  onClick={() => {
+                    setShowLogin(true);
+                  }}
+                >
+                  Change Account
+                </NavDropdown.Item>
+              </NavDropdown>
             </Nav>
-            <HowToPlayModal show={showHowTo} handleClose={handleCloseHowTo} />
-            <AboutModal show={showAbout} handleClose={handleCloseAbout} />
           </Navbar.Collapse>
         </Container>
       </Navbar>
 
-      <Tetris />
+      <HowToPlayModal show={showHowTo} setShow={setShowHowTo} />
+      <AboutModal show={showAbout} setShow={setShowAbout} />
+      <LoginModal show={showLogin} setShow={setShowLogin} />
+
+      <Container className="main-contents-container m-3">
+        <Row>
+          <Col lg={3} className="d-none d-lg-block">
+            <MiniLeaderboard />
+          </Col>
+          <Col xs={12} md={6} lg={4}>
+            <h3>Player 1: username</h3>
+            <Tetris focus={gameFocus} />
+          </Col>
+          <Col md={6} lg={4} className="d-none d-md-block">
+            <h3>Player 2: username</h3>
+            <Tetris focus={false} />
+          </Col>
+        </Row>
+      </Container>
     </>
   );
 }
 
-function HowToPlayModal({ show, handleClose }) {
+function MiniLeaderboard() {
+  return (
+    <>
+      <Container className="leaderboard-container">
+        <h3>Leaderboard</h3>
+        <Card className="leaderboard-card">
+          <Card.Body className="d-flex align-items-center justify-content-start">
+            <p className="mb-0">14200 tetrisChamp85</p>
+          </Card.Body>
+        </Card>
+        <Card className="leaderboard-card">
+          <Card.Body className="d-flex align-items-center justify-content-start">
+            <p className="mb-0">9001 kakorot97</p>
+          </Card.Body>
+        </Card>
+        <Card className="leaderboard-card">
+          <Card.Body className="d-flex align-items-center justify-content-start">
+            <p className="mb-0">4000 mitteBitte22</p>
+          </Card.Body>
+        </Card>
+      </Container>
+    </>
+  );
+}
+
+function LoginModal({ show, setShow }) {
+  const handleClose = () => setShow(false);
+  return (
+    <>
+      <Modal show={show} onHide={handleClose} data-bs-theme="dark">
+        <Modal.Header closeButton>
+          <Modal.Title>Log In</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3" controlId="formUsername">
+              <Form.Label>Username</Form.Label>
+              <Form.Control type="text" placeholder="Enter username" />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formPassword">
+              <Form.Label>Password</Form.Label>
+              <Form.Control type="password" placeholder="Enter password" />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit" onClick={handleClose}>
+            Log In
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+function HowToPlayModal({ show, setShow }) {
+  const handleClose = () => setShow(false);
   return (
     <>
       <Modal show={show} onHide={handleClose} data-bs-theme="dark">
@@ -91,7 +194,8 @@ function HowToPlayModal({ show, handleClose }) {
   );
 }
 
-function AboutModal({ show, handleClose }) {
+function AboutModal({ show, setShow }) {
+  const handleClose = () => setShow(false);
   return (
     <>
       <Modal show={show} onHide={handleClose} data-bs-theme="dark">

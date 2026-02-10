@@ -3,7 +3,9 @@ import "./Tetris.css";
 import { useState, useEffect } from "react";
 import { socket } from "./socket";
 
-export default function Tetris() {
+import Container from "react-bootstrap/Container";
+
+export default function Tetris({ focus }) {
   const GRID_WIDTH = 10;
   const GRID_HEIGHT = 20;
   const [grid, setGrid] = useState(
@@ -94,22 +96,25 @@ export default function Tetris() {
       }
     };
 
-    window.addEventListener("keydown", handleEvent);
-    return () => {
-      window.removeEventListener("keydown", handleEvent);
-    };
-  }, []);
+    // check focus first; else event-handlers override inputs elsewhere
+    if (focus) {
+      window.addEventListener("keydown", handleEvent);
+      return () => {
+        window.removeEventListener("keydown", handleEvent);
+      };
+    }
+  }, [focus]);
 
   return (
     <>
-      <div className="game-window">
+      <Container className="game-window">
         <BlockZone grid={grid} BLOCK_TYPES={BLOCK_TYPES} />
         <div>
           <BlockZone grid={nextBlock} BLOCK_TYPES={BLOCK_TYPES} />
           <ScoreBoard score={score} />
           <GameOver gameOver={gameOver} />
         </div>
-      </div>
+      </Container>
     </>
   );
 }
