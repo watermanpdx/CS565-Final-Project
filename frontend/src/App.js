@@ -72,13 +72,11 @@ export default function App() {
           <Col lg={3} className="d-none d-lg-block">
             <MiniLeaderboard />
           </Col>
-          <Col xs={12} md={6} lg={4}>
-            <h3>Player 1: username</h3>
-            <Tetris focus={gameFocus} />
+          <Col xs={8} md={4} lg={3}>
+            <Tetris playerInfo="Player 1: username" focus={gameFocus} />
           </Col>
-          <Col md={6} lg={4} className="d-none d-md-block">
-            <h3>Player 2: username</h3>
-            <Tetris focus={false} />
+          <Col md={4} lg={3} className="d-none d-md-block">
+            <Tetris playerInfo="Player 2: username" focus={false} />
           </Col>
         </Row>
       </Container>
@@ -91,17 +89,17 @@ function MiniLeaderboard() {
     <>
       <Container className="leaderboard-container">
         <h3>Leaderboard</h3>
-        <Card className="leaderboard-card">
+        <Card className="leaderboard-card mb-2">
           <Card.Body className="d-flex align-items-center justify-content-start">
             <p className="mb-0">14200 tetrisChamp85</p>
           </Card.Body>
         </Card>
-        <Card className="leaderboard-card">
+        <Card className="leaderboard-card mb-2">
           <Card.Body className="d-flex align-items-center justify-content-start">
             <p className="mb-0">9001 kakorot97</p>
           </Card.Body>
         </Card>
-        <Card className="leaderboard-card">
+        <Card className="leaderboard-card mb-2">
           <Card.Body className="d-flex align-items-center justify-content-start">
             <p className="mb-0">4000 mitteBitte22</p>
           </Card.Body>

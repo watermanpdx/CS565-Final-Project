@@ -1,13 +1,45 @@
 .game-window {
-  display: flex;
-  align-items: flex-start;
-  width: 300px;
-  gap: 10px;
-  margin: 10px;
+  background-color: rgb(117, 116, 116);
 }
 
-.game-grid {
-  display: inline-block;
+.player-info {
+  margin-top: 2%;
+  margin-left: 5%;
+  font-size: 1.4rem;
+}
+
+.game-body {
+  display: flex;
+  align-items: flex-start;
+  padding: 5%;
+  padding-top: 0%;
+  gap: 5%;
+}
+
+.play-window {
+  width: 69%;
+}
+
+.side-bar {
+  width: 26%;
+}
+
+.score-board {
+  margin-top: 20%;
+  padding-right: 5px;
+  font-size: 1rem;
+  color: white;
+  text-align: right;
+  background-color: black;
+}
+
+.score-label {
+  font-size: 0.7rem;
+}
+
+.game-over {
+  text-align: center;
+  font-size: 1.1rem;
 }
 
 .game-row {
@@ -15,8 +47,8 @@
 }
 
 .game-cell {
-  width: 20px;
-  height: 20px;
+  flex: 1;
+  aspect-ratio: 1 / 1;
   border: 1px solid black;
   box-sizing: border-box;
 }
@@ -26,11 +58,11 @@
 }
 
 .square-block {
-  background-color: white;
+  background-color: yellow;
 }
 
 .line-block {
-  background-color: blue;
+  background-color: cyan;
 }
 
 .s-block {
@@ -38,17 +70,17 @@
 }
 
 .z-block {
-  background-color: orange;
+  background-color: red;
 }
 
 .l-block {
-  background-color: pink;
+  background-color: orange;
 }
 
 .j-block {
-  background-color: purple;
+  background-color: blue;
 }
 
 .t-block {
-  background-color: red;
+  background-color: magenta;
 }

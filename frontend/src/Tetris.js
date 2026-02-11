@@ -3,9 +3,9 @@ import "./Tetris.css";
 import { useState, useEffect } from "react";
 import { socket } from "./socket";
 
-import Container from "react-bootstrap/Container";
+import Card from "react-bootstrap/Card";
 
-export default function Tetris({ focus }) {
+export default function Tetris({ playerInfo, focus }) {
   const GRID_WIDTH = 10;
   const GRID_HEIGHT = 20;
   const [grid, setGrid] = useState(
@@ -107,21 +107,28 @@ export default function Tetris({ focus }) {
 
   return (
     <>
-      <Container className="game-window">
-        <BlockZone grid={grid} BLOCK_TYPES={BLOCK_TYPES} />
-        <div>
-          <BlockZone grid={nextBlock} BLOCK_TYPES={BLOCK_TYPES} />
-          <ScoreBoard score={score} />
-          <GameOver gameOver={gameOver} />
-        </div>
-      </Container>
+      <Card className="game-window">
+        <p className="player-info">{playerInfo}</p>
+        <Card.Body className="game-body">
+          <BlockZone
+            className="play-window"
+            grid={grid}
+            BLOCK_TYPES={BLOCK_TYPES}
+          />
+          <div className="side-bar">
+            <BlockZone grid={nextBlock} BLOCK_TYPES={BLOCK_TYPES} />
+            <ScoreBoard score={score} />
+            <GameOver gameOver={gameOver} />
+          </div>
+        </Card.Body>
+      </Card>
     </>
   );
 }
 
-function BlockZone({ grid, BLOCK_TYPES }) {
+function BlockZone({ className, grid, BLOCK_TYPES }) {
   return (
-    <div className="game-grid">
+    <div className={`game-col ${className}`}>
       {grid.map((row, i) => (
         <div key={i} className="game-row">
           {row.map((typeIndex, j) => (
@@ -137,7 +144,14 @@ function BlockZone({ grid, BLOCK_TYPES }) {
 }
 
 function ScoreBoard({ score }) {
-  return <div className="score-board">Score: {score}</div>;
+  return (
+    <>
+      <div className="score-board">{score}</div>
+      <p className="score-label">
+        <b>SCORE</b>
+      </p>
+    </>
+  );
 }
 
 function GameOver({ gameOver }) {
@@ -146,5 +160,9 @@ function GameOver({ gameOver }) {
     response = "GAME OVER";
   }
 
-  return <div className="game-over">{response}</div>;
+  return (
+    <div className="game-over">
+      <b>{response}</b>
+    </div>
+  );
 }
