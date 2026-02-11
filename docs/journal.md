@@ -52,7 +52,7 @@ Although the focus of this update was on implementing Socket.IO, I also made som
 ## Frontend Update
 
 Branch: [`feature/frontend-react`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/frontend-react)
-Commit: []()
+Commit: [6297257](https://github.com/watermanpdx/CS565-Final-Project/commit/6297257ff943f7cae4910269f3eccf30c0c219b8)
 
 In this update I expanded the frontend page with some of the initial web-page components. However, I did not end up completing all components as initially planned. For many of the features I will require backend data (leaderboard and user accounts) to proceed. And decided to pause here so that I can pivot towards implementing that content to support expansion of the frontend features.
 
