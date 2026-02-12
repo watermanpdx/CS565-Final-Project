@@ -8,9 +8,12 @@ import Modal from "react-bootstrap/Modal";
 import Toast from "react-bootstrap/Toast";
 import ToastContainer from "react-bootstrap/ToastContainer";
 
+const URL = "http://localhost:3001";
+
 export default function AccountModal({ show, setShow, setUsernameParent }) {
   const [view, setView] = useState("login");
   const [toast, setToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordCheck, setPasswordCheck] = useState("");
@@ -18,7 +21,7 @@ export default function AccountModal({ show, setShow, setUsernameParent }) {
   const handleClose = () => setShow(false);
 
   const handleLogin = async () => {
-    const res = await fetch("http://localhost:3001/login", {
+    const res = await fetch(`${URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -26,22 +29,38 @@ export default function AccountModal({ show, setShow, setUsernameParent }) {
     const { success, usernameResponse } = await res.json();
 
     if (success) {
+      // successful login
       setUsername(usernameResponse);
-      //handleClose();
+      handleClose();
     } else {
+      // failed login
     }
   };
 
   const handleNewAccount = async () => {
     if (password === passwordCheck) {
+      const res = await fetch(`${URL}/new-account`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const { success } = await res.json();
     } else {
+      setToastMessage("Passwords do not match");
       setToast(true);
     }
   };
 
   const handleUpdatePassword = async () => {
     if (password === passwordCheck) {
+      const res = await fetch(`${URL}/password-reset`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const { success } = await res.json();
     } else {
+      setToastMessage("Passwords do not match");
       setToast(true);
     }
   };
@@ -95,7 +114,7 @@ export default function AccountModal({ show, setShow, setUsernameParent }) {
           autohide
           className="bg-light text-black border-0"
         >
-          <Toast.Body>Passwords do not match</Toast.Body>
+          <Toast.Body>{toastMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
     </>
@@ -180,7 +199,7 @@ function NewAccount({
           <Form.Group className="mb-3" controlId="formUsername">
             <Form.Label>Password</Form.Label>
             <Form.Control
-              type="text"
+              type="password"
               placeholder="Enter password"
               onChange={(e) => setPassword1(e.target.value)}
             />
@@ -224,7 +243,7 @@ function ResetPassword({
           <Form.Group className="mb-3" controlId="formUsername">
             <Form.Label>Password</Form.Label>
             <Form.Control
-              type="text"
+              type="password"
               placeholder="Enter password"
               onChange={(e) => setPassword1(e.target.value)}
             />

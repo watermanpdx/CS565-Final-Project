@@ -103,6 +103,18 @@ app.post("/login", (req, res) => {
   res.json({ success: true, username: username });
 });
 
+app.post("/new-account", (req, res) => {
+  const { username, password } = req.body;
+
+  res.json({ success: true });
+});
+
+app.post("/password-reset", (req, res) => {
+  const { username, password } = req.body;
+
+  res.json({ success: true });
+});
+
 // Start server
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
