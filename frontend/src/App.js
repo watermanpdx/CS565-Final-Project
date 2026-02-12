@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Tetris from "./Tetris.js";
+import AccountModal from "./Login.js";
 
 import { useState } from "react";
 
@@ -10,12 +11,11 @@ import Col from "react-bootstrap/Col";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import Card from "react-bootstrap/Card";
 
 export default function App() {
+  const [username, setUsername] = useState("username");
   const [showHowTo, setShowHowTo] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -49,7 +49,7 @@ export default function App() {
                 About
               </Nav.Link>
 
-              <NavDropdown title="Username" id="basic-nav-dropdown">
+              <NavDropdown title={username} id="basic-nav-dropdown">
                 <NavDropdown.Item
                   onClick={() => {
                     setShowLogin(true);
@@ -65,7 +65,11 @@ export default function App() {
 
       <HowToPlayModal show={showHowTo} setShow={setShowHowTo} />
       <AboutModal show={showAbout} setShow={setShowAbout} />
-      <LoginModal show={showLogin} setShow={setShowLogin} />
+      <AccountModal
+        show={showLogin}
+        setShow={setShowLogin}
+        setUsernameParent={setUsername}
+      />
 
       <Container className="main-contents-container m-3">
         <Row>
@@ -73,7 +77,7 @@ export default function App() {
             <MiniLeaderboard />
           </Col>
           <Col xs={8} md={4} lg={3}>
-            <Tetris playerInfo="Player 1: username" focus={gameFocus} />
+            <Tetris playerInfo={`Player 1: ${username}`} focus={gameFocus} />
           </Col>
           <Col md={4} lg={3} className="d-none d-md-block">
             <Tetris playerInfo="Player 2: username" focus={false} />
@@ -105,39 +109,6 @@ function MiniLeaderboard() {
           </Card.Body>
         </Card>
       </Container>
-    </>
-  );
-}
-
-function LoginModal({ show, setShow }) {
-  const handleClose = () => setShow(false);
-  return (
-    <>
-      <Modal show={show} onHide={handleClose} data-bs-theme="dark">
-        <Modal.Header closeButton>
-          <Modal.Title>Log In</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3" controlId="formUsername">
-              <Form.Label>Username</Form.Label>
-              <Form.Control type="text" placeholder="Enter username" />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formPassword">
-              <Form.Label>Password</Form.Label>
-              <Form.Control type="password" placeholder="Enter password" />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" type="submit" onClick={handleClose}>
-            Log In
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </>
   );
 }

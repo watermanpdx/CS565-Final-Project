@@ -1,8 +1,12 @@
+const cors = require("cors");
 const express = require("express");
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const port = process.env.PORT || 3001;
+
+const sql = require("better-sqlite3");
+const db = new sql("database.db");
 
 const Tetris = require("./tetris.js");
 const game = new Tetris();
@@ -12,6 +16,27 @@ let gameInterval = null;
 
 const { Server } = require("socket.io");
 const io = new Server(server);
+
+// Database
+db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    username TEXT PRIMARY KEY,
+    password TEXT NOT NULL
+  )
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS scores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    duration INTEGER,
+    date DATETIME,
+    FOREIGN KEY (username) REFERENCES users(username)
+  )  
+`);
+
+db.close();
 
 // Socket.IO communication
 const interval = null;
@@ -61,11 +86,21 @@ function stopGame() {
   }
 }
 
+// REST and routing
+app.use(cors({ origin: "http://localhost:3000" }));
+app.use(express.json());
+
 // Hello world
 app.get("/", (req, res) => {
   res.status(200);
   res.set({ "Content-Type": "text/html" });
   res.send("Hello world!");
+});
+
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+
+  res.json({ success: true, username: username });
 });
 
 // Start server

@@ -63,3 +63,14 @@ Although the basic Bootstrap integration was rather straight-forward, I found th
 Last, I decided to clean up the Tetris game window. As the contents of the game-window are unique, and unlike other elements of the web-page (rendering game graphics rather than text or menus), I chose to give this component a dedicated .css configuration and control the contents directly via .css. This gave me a lot of control, however became substatially more time-consuming than initially anticipated. Trying to get precisely what I wanted with .css alone was rather challenging, and took MANY iterations to get working in the way I wanted. I may still revisit this as elements of the font-size (especially regarding responsiveness) are not completely to my satisfaction. However, to not lose progress, I will put this off to refinement at a later time. (Aside, block coloring also updated in accordance with [Tetris Guidelines](https://tetris.fandom.com/wiki/Tetris_Guideline))
 
 For the next major update I plan on implementing the initial user-account + login including storage of data in a database. Depending on progress, I also plan to add high-score retention in the same database. This will be used to then continue the frontend development of the login form, and leaderboard mini-board and page.
+
+## Login and Database
+
+CORS issue with POST from frontend to backend
+
+https://react.dev/learn/conditional-rendering
+
+https://www.w3resource.com/sqlite/snippets/better-sqlite3.php
+
+https://www.sqlitetutorial.net/sqlite-nodejs/
+https://www.sqlitetutorial.net/sqlite-nodejs/connect/
