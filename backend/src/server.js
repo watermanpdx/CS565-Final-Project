@@ -17,15 +17,15 @@ let gameInterval = null;
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-// Database
-db.exec(`
+// Database (setup)
+db.prepare(`
   CREATE TABLE IF NOT EXISTS users (
     username TEXT PRIMARY KEY,
     password TEXT NOT NULL
   )
 `);
 
-db.exec(`
+db.prepare(`
   CREATE TABLE IF NOT EXISTS scores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
@@ -35,8 +35,6 @@ db.exec(`
     FOREIGN KEY (username) REFERENCES users(username)
   )  
 `);
-
-db.close();
 
 // Socket.IO communication
 const interval = null;
@@ -99,20 +97,52 @@ app.get("/", (req, res) => {
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
-
-  res.json({ success: true, username: username });
+  try {
+    const record = db
+      .prepare("SELECT * FROM users WHERE username = ?")
+      .get(username);
+    if (password === record.password) {
+      res.json({ success: true, username: username });
+      return;
+    } else {
+      res.json({ success: false, username: null });
+      return;
+    }
+  } catch {
+    res.json({ success: false, username: null });
+    return;
+  }
 });
 
 app.post("/new-account", (req, res) => {
   const { username, password } = req.body;
-
-  res.json({ success: true });
+  try {
+    db.prepare("INSERT INTO users (username, password) VALUES (?, ?)").run(
+      username,
+      password,
+    );
+    res.json({ success: true });
+    return;
+  } catch {
+    res.json({ success: false });
+    return;
+  }
 });
 
 app.post("/password-reset", (req, res) => {
   const { username, password } = req.body;
 
-  res.json({ success: true });
+  try {
+    db.prepare("UPDATE users SET password = ? WHERE username = ?").run(
+      password,
+      username,
+    );
+    res.json({ success: true });
+    return;
+  } catch {
+    res.json({ success: false });
+    return;
+  }
 });
 
 // Start server

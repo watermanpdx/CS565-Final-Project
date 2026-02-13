@@ -72,5 +72,8 @@ https://react.dev/learn/conditional-rendering
 
 https://www.w3resource.com/sqlite/snippets/better-sqlite3.php
 
-https://www.sqlitetutorial.net/sqlite-nodejs/
-https://www.sqlitetutorial.net/sqlite-nodejs/connect/
+implemented basic login. Reference pain with variable names using destructuring and different levels.
+
+Need mechanism for storing username server-side. Cookies?
+
+Also come back to tabs and enter not working in forms; review but don't touch now

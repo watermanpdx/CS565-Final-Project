@@ -21,30 +21,38 @@ export default function AccountModal({ show, setShow, setUsernameParent }) {
   const handleClose = () => setShow(false);
 
   const handleLogin = async () => {
-    const res = await fetch(`${URL}/login`, {
+    const post = await fetch(`${URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    const { success, usernameResponse } = await res.json();
+    const res = await post.json();
 
-    if (success) {
+    console.log(res.success, res.username);
+    if (res.success && res.username) {
       // successful login
-      setUsername(usernameResponse);
+      setUsernameParent(res.username);
       handleClose();
     } else {
-      // failed login
+      setToastMessage("Username or password incorrect");
+      setToast(true);
     }
   };
 
   const handleNewAccount = async () => {
     if (password === passwordCheck) {
-      const res = await fetch(`${URL}/new-account`, {
+      const post = await fetch(`${URL}/new-account`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-      const { success } = await res.json();
+      const { success } = await post.json();
+      if (success) {
+        setView("login");
+      } else {
+        setToastMessage("Account registration failed. Please retry");
+        setToast(true);
+      }
     } else {
       setToastMessage("Passwords do not match");
       setToast(true);
@@ -53,12 +61,18 @@ export default function AccountModal({ show, setShow, setUsernameParent }) {
 
   const handleUpdatePassword = async () => {
     if (password === passwordCheck) {
-      const res = await fetch(`${URL}/password-reset`, {
+      const post = await fetch(`${URL}/password-reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-      const { success } = await res.json();
+      const { success } = await post.json();
+      if (success) {
+        setView("login");
+      } else {
+        setToastMessage("Password update failed. Please retry");
+        setToast(true);
+      }
     } else {
       setToastMessage("Passwords do not match");
       setToast(true);
