@@ -67,7 +67,7 @@ For the next major update I plan on implementing the initial user-account + logi
 ## Login and Database
 
 Branch: [`feature/databaset`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/database)
-Commit: []()
+Commit: [f43c58d](https://github.com/watermanpdx/CS565-Final-Project/commit/f43c58dfaecda85afc37f5bbea9c0b5d11b5ebdf)
 
 In this update I focused on implementing the first iteration of the backend database in order to complete the initial user-login, and leaderboard functionality. For this I used [better-sqlite3](https://www.w3resource.com/sqlite/snippets/better-sqlite3.php). Following some initial research I chose this package as it offers an SQL interfaces to data, but without the need for a dedicated, separate SQL process which must be connected to. Instead, the database data is stored as a local file and the database functionality is managed within the Node package itself. Depending on the database technologies that we use in the course (not yet covered at the time of this entry), I will adapt this code to those covered. Before knowing this, I chose better-sqlite3 to simplify interaction with the database and reduce installation and management of the database outside the Node code.
 
