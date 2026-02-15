@@ -5,6 +5,7 @@ const GRID_WIDTH = 10;
 const GRID_HEIGHT = 20;
 const NEXT_WIDTH = 4;
 const NEXT_HEIGHT = 4;
+const GAME_PERIOD = 20; // ms
 const START_SPEED = 30; // ticks per drop. Higher = slower
 const SCORE_MULTIPLIER = [0, 40, 100, 300, 1200];
 const BLOCK_ENUM = {
@@ -339,7 +340,18 @@ class TBlock extends Block {
 // Core game class ------------------------------------------------------------
 const BLOCKS = [SquareBlock, LineBlock, SBlock, ZBlock, LBlock, JBlock, TBlock];
 class Tetris {
+  constructor() {
+    this.onStartHandle = null;
+    this.onUpdateHandle = null;
+    this.onEndHandle = null;
+    this.player = null;
+
+    this.init();
+  }
+
   init() {
+    this.stop();
+
     // construct and zero board
     this.grid = Array(GRID_HEIGHT)
       .fill(null)
@@ -358,11 +370,21 @@ class Tetris {
     this.score = 0;
     this.gameOver = false;
 
-    return {
+    this.currentState = {
       grid: this.grid,
       score: this.score,
       next: this.nextBlock.miniGrid,
+      gameOver: this.gameOver,
     };
+    return this.currentState;
+  }
+
+  setPlayer(player) {
+    this.player = player;
+  }
+
+  getPlayer(player) {
+    return this.player;
   }
 
   getRandomBlock() {
@@ -425,12 +447,13 @@ class Tetris {
     }
 
     // return full game state
-    return {
+    this.currentState = {
       grid: grid,
       next: this.nextBlock.miniGrid,
       score: this.score,
       gameOver: this.gameOver,
     };
+    return this.currentState;
   }
 
   clearLines() {
@@ -458,6 +481,51 @@ class Tetris {
     if (count < 5) {
       this.score += SCORE_MULTIPLIER[count] * (this.level + 1);
     }
+  }
+
+  isRunning() {
+    return this.running;
+  }
+
+  run() {
+    if (this.onStartHandle) {
+      this.onStartHandle();
+    }
+    this.startTime = Date.now();
+
+    this.running = true;
+    this.interval = setInterval(() => {
+      const state = this.update();
+      if (this.onUpdateHandle) {
+        this.onUpdateHandle(state);
+      }
+
+      if (state.gameOver) {
+        this.stop();
+      }
+    }, GAME_PERIOD);
+  }
+
+  stop() {
+    if (this.running) {
+      clearInterval(this.interval);
+      this.running = false;
+      if (this.onEndHandle) {
+        this.onEndHandle(this.currentState, Date.now() - this.startTime);
+      }
+    }
+  }
+
+  onStart(handle) {
+    this.onStartHandle = handle;
+  }
+
+  onUpdate(handle) {
+    this.onUpdateHandle = handle;
+  }
+
+  onEnd(handle) {
+    this.onEndHandle = handle;
   }
 }
 
