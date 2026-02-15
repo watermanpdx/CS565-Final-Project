@@ -3,7 +3,7 @@ import "./App.css";
 import Tetris from "./Tetris.js";
 import AccountModal from "./Login.js";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -14,7 +14,10 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import Modal from "react-bootstrap/Modal";
 import Card from "react-bootstrap/Card";
 
+const URL = "http://localhost:3001";
+
 export default function App() {
+  const [view, setView] = useState("home");
   const [username, setUsername] = useState("username");
   const [showHowTo, setShowHowTo] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
@@ -32,7 +35,13 @@ export default function App() {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link href="#home">Home</Nav.Link>
+              <Nav.Link
+                onClick={() => {
+                  setView("home");
+                }}
+              >
+                Home
+              </Nav.Link>
               <Nav.Link
                 onClick={() => {
                   setShowHowTo(true);
@@ -40,7 +49,13 @@ export default function App() {
               >
                 How-To-Play
               </Nav.Link>
-              <Nav.Link>Leaderboard</Nav.Link>
+              <Nav.Link
+                onClick={() => {
+                  setView("leaderboard");
+                }}
+              >
+                Leaderboard
+              </Nav.Link>
               <Nav.Link
                 onClick={() => {
                   setShowAbout(true);
@@ -71,43 +86,91 @@ export default function App() {
         setUsernameParent={setUsername}
       />
 
-      <Container className="main-contents-container m-3">
-        <Row>
-          <Col lg={3} className="d-none d-lg-block">
-            <MiniLeaderboard />
-          </Col>
-          <Col xs={8} md={4} lg={3}>
-            <Tetris playerInfo={`Player 1: ${username}`} focus={gameFocus} />
-          </Col>
-          <Col md={4} lg={3} className="d-none d-md-block">
-            <Tetris playerInfo="Player 2: username" focus={false} />
-          </Col>
-        </Row>
-      </Container>
+      {view === "home" && (
+        <Container className="main-contents-container m-3">
+          <Row>
+            <Col lg={3} className="d-none d-lg-block">
+              <MiniLeaderboard />
+            </Col>
+            <Col xs={8} md={4} lg={3}>
+              <Tetris playerInfo={`Player 1: ${username}`} focus={gameFocus} />
+            </Col>
+            <Col md={4} lg={3} className="d-none d-md-block">
+              <Tetris playerInfo="Player 2: username" focus={false} />
+            </Col>
+          </Row>
+        </Container>
+      )}
+      {view === "leaderboard" && <Leaderboard />}
     </>
   );
 }
 
 function MiniLeaderboard() {
+  const [scores, setScores] = useState([]);
+
+  useEffect(() => {
+    async function getScores() {
+      const res = await fetch(`${URL}/scores?maxEntries=3`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      setScores(data);
+    }
+
+    getScores();
+  }, []);
+
   return (
     <>
       <Container className="leaderboard-container">
         <h3>Leaderboard</h3>
-        <Card className="leaderboard-card mb-2">
-          <Card.Body className="d-flex align-items-center justify-content-start">
-            <p className="mb-0">14200 tetrisChamp85</p>
-          </Card.Body>
-        </Card>
-        <Card className="leaderboard-card mb-2">
-          <Card.Body className="d-flex align-items-center justify-content-start">
-            <p className="mb-0">9001 kakorot97</p>
-          </Card.Body>
-        </Card>
-        <Card className="leaderboard-card mb-2">
-          <Card.Body className="d-flex align-items-center justify-content-start">
-            <p className="mb-0">4000 mitteBitte22</p>
-          </Card.Body>
-        </Card>
+        {scores.map((score) => (
+          <Card key={score.id} className="leaderboard-card mb-2">
+            <Card.Body className="d-flex align-items-center justify-content-start">
+              <p className="mb-0">
+                {score.score} {score.username}
+              </p>
+            </Card.Body>
+          </Card>
+        ))}
+      </Container>
+    </>
+  );
+}
+
+function Leaderboard() {
+  const [scores, setScores] = useState([]);
+
+  useEffect(() => {
+    async function getScores() {
+      const res = await fetch(`${URL}/scores`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      setScores(data);
+    }
+
+    getScores();
+  }, []);
+
+  return (
+    <>
+      <Container className="leaderboard-container">
+        <h3>Leaderboard</h3>
+        {scores.map((score) => (
+          <Card key={score.id} className="leaderboard-card mb-2">
+            <Card.Body className="d-flex align-items-center justify-content-start">
+              <p className="mb-0">
+                {score.score}, {score.username},{" "}
+                {(score.durationMs / 1000).toFixed(1)} sec,{" "}
+                {new Date(score.date).toString()}
+              </p>
+            </Card.Body>
+          </Card>
+        ))}
       </Container>
     </>
   );

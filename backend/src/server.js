@@ -10,38 +10,41 @@ const db = new sql("database.db");
 
 const Tetris = require("./tetris.js");
 const game = new Tetris();
-const GAME_PERIOD = 20; //ms
-let gameRunning = false;
-let gameInterval = null;
 
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+const MAX_SCORE_ENTRIES = 10000;
+
 // Database (setup)
-db.prepare(`
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS users (
     username TEXT PRIMARY KEY,
     password TEXT NOT NULL
   )
-`);
+`,
+).run();
 
-db.prepare(`
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS scores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     score INTEGER NOT NULL,
-    duration INTEGER,
+    durationMs INTEGER,
     date DATETIME,
     FOREIGN KEY (username) REFERENCES users(username)
   )  
-`);
+`,
+).run();
 
 // Socket.IO communication
-const interval = null;
 io.on("connection", (socket) => {
   console.log(`Connected to socket.id: ${socket.id}`);
-  if (!gameRunning) {
-    startGame();
+  if (!game.isRunning()) {
+    game.init();
+    game.run();
   }
 
   socket.on("moveLeft", (socket) => {
@@ -64,23 +67,24 @@ io.on("connection", (socket) => {
     game.rotateRight();
   });
 
-  socket.emit("render", game.init());
+  //socket.emit("render", game.init());
+});
+
+game.onUpdate((state) => {
+  io.emit("render", state);
+});
+
+game.onEnd((state, durationMs) => {
+  addScore(game.getPlayer(), state.score, durationMs);
 });
 
 io.on("disconnect", (socket) => {});
 
-function startGame() {
-  gameInterval = setInterval(() => {
-    io.emit("render", game.update());
-  }, GAME_PERIOD);
-  gameRunning = true;
-}
-
-function stopGame() {
-  if (gameInterval) {
-    clearInterval(interval);
-    gameInterval = null;
-    gameRunning = false;
+function addScore(username, score, durationMs) {
+  if (username && score > 0) {
+    db.prepare(
+      "INSERT INTO scores (username, score, durationMs, date) VALUES (?, ?, ?, ?)",
+    ).run(username, score, durationMs, new Date().toISOString());
   }
 }
 
@@ -95,6 +99,19 @@ app.get("/", (req, res) => {
   res.send("Hello world!");
 });
 
+app.get("/scores", (req, res) => {
+  const maxEntries = req.query.maxEntries
+    ? req.query.maxEntries
+    : MAX_SCORE_ENTRIES;
+  try {
+    const scores = db
+      .prepare("SELECT * FROM scores ORDER BY score DESC LIMIT ?")
+      .all(maxEntries);
+    res.status(200);
+    res.json(scores);
+  } catch {}
+});
+
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
   try {
@@ -102,7 +119,10 @@ app.post("/login", (req, res) => {
       .prepare("SELECT * FROM users WHERE username = ?")
       .get(username);
     if (password === record.password) {
+      //Successful login
       res.json({ success: true, username: username });
+      game.setPlayer(username);
+
       return;
     } else {
       res.json({ success: false, username: null });

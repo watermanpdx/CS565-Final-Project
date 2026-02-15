@@ -66,14 +66,21 @@ For the next major update I plan on implementing the initial user-account + logi
 
 ## Login and Database
 
-CORS issue with POST from frontend to backend
+Branch: [`feature/databaset`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/database)
+Commit: []()
 
-https://react.dev/learn/conditional-rendering
+In this update I focused on implementing the first iteration of the backend database in order to complete the initial user-login, and leaderboard functionality. For this I used [better-sqlite3](https://www.w3resource.com/sqlite/snippets/better-sqlite3.php). Following some initial research I chose this package as it offers an SQL interfaces to data, but without the need for a dedicated, separate SQL process which must be connected to. Instead, the database data is stored as a local file and the database functionality is managed within the Node package itself. Depending on the database technologies that we use in the course (not yet covered at the time of this entry), I will adapt this code to those covered. Before knowing this, I chose better-sqlite3 to simplify interaction with the database and reduce installation and management of the database outside the Node code.
 
-https://www.w3resource.com/sqlite/snippets/better-sqlite3.php
+As part of bringing up the database, I also needed to complete the functional implementation of the login modal. This ended up becoming more challenging than expected. In supporting all the different login needs (log-in, new account, password reset, etc), there were many different views required and many similar fields; all of which contained data which needed to be added to `POST` requests to the server. I oscilated quite a bit between trying to contain contents within modular components and orchetrating states in the parent component. One issue I encountered was that burying the `Modal` class within components had the undesired effect of causing the modal to re-animate switching between views (since I was wholly creating new modals). I chose to keep modular components, but add them all within one `Modal` element and switch between views based on a `view` state. To do this I found that `if` can be encoded into the `<> </>` React contents via `{<truth statement> && (<> ... </>)} ([conditional rendering](https://react.dev/learn/conditional-rendering)). This ended up being a very usefull pattern that I ended up using to also control the "home" and "leaderboard" views on the frontend main-contents.
 
-implemented basic login. Reference pain with variable names using destructuring and different levels.
+I encountered a small issue with `POST` where I could not post to the server due to different IP addresses for the frontend React IP (development server) and backend. I had to explicitly add a CORS policy on the backend for the React IP address + port to allow posts to get through. Right now, I am using the React development server, but for final implementation will serve the files from my server. At that point I should be able to remove this CORS policy.
 
-Need mechanism for storing username server-side. Cookies?
+I also decided to add a sub-feature in the leaderboard where games duration would be tracked and the date at which the score was achieved would be displayed. I was a bit nervous about time formatting, as it can get very complex if managed manually. However, it turned out that the built-in [`Date`](https://www.geeksforgeeks.org/web-tech/express-js-req-query-property/) class made this very easy to manage. I was able to use this to easily get current system time, calculate total duration, pass date-time to the database `DATE` datatype, and format it for rendering to the web-page all with the native methods supplied.
 
-Also come back to tabs and enter not working in forms; review but don't touch now
+To store score data to the database, I also modified the core `Tetris` code. I chose to further encapsulate some of its functionality by pushing the cyclic execution interval into the class and out of the server code. I also added a handful of call-back registering functions to allow the server code to pass functionality to the `Tetris` game to be called on game-start, update, and game-end. I've never implemented my own callbacks in a class before, but it ended up being very straight-forward in Javascript, and aided in separating out server vs game concerns. In my server code, I passed as callbaks the socket-io communication and server-side logic I wanted to be envoked, but was able to keep out logic about when and how such game-states were reached. This turned out to be a very usefull pattern that I intend on using further in the future.
+
+One open issue, is that although my database is now implemented, I have basic login and score logic implemented, and a playable game environment running, it only supports one player. Splitting into a two player mode will require additional functionality, and a means for the server to distinguish between clients. I was initially going to try and split this out in this update, but found myself asking too many questions about the split while simultaneously trying to figure out the database and `REST` implementations. I chose to leave out the two-player management in this pass for simplicity. This will be the focus of my next major update.
+
+# References
+
+https://www.geeksforgeeks.org/web-tech/express-js-req-query-property/
