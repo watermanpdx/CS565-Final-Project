@@ -13,19 +13,29 @@ import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import Modal from "react-bootstrap/Modal";
 import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
 
 const URL = "http://localhost:3001";
 
 export default function App() {
   const [view, setView] = useState("home");
-  const [username, setUsername] = useState("username");
+  const [mode, setMode] = useState("1-player");
+  const [username, setUsername] = useState(sessionStorage.getItem("username"));
   const [showHowTo, setShowHowTo] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
+  const [showLogin, setShowLogin] = useState(username === null);
 
   // Prevent game from overtaking keyboard for modals
   // TODO narrow focus to prevent other effects
   const gameFocus = !(showHowTo || showAbout || showLogin);
+
+  useEffect(() => {
+    if (username) {
+      sessionStorage.setItem("username", username);
+    } else {
+      sessionStorage.removeItem("username", username);
+    }
+  }, [username]);
 
   return (
     <>
@@ -64,7 +74,10 @@ export default function App() {
                 About
               </Nav.Link>
 
-              <NavDropdown title={username} id="basic-nav-dropdown">
+              <NavDropdown
+                title={username ? username : "username"}
+                id="basic-nav-dropdown"
+              >
                 <NavDropdown.Item
                   onClick={() => {
                     setShowLogin(true);
@@ -83,6 +96,7 @@ export default function App() {
       <AccountModal
         show={showLogin}
         setShow={setShowLogin}
+        usernameParent={username}
         setUsernameParent={setUsername}
       />
 
@@ -91,13 +105,70 @@ export default function App() {
           <Row>
             <Col lg={3} className="d-none d-lg-block">
               <MiniLeaderboard />
+              <Card className="number-players-control">
+                {mode === "1-player" && (
+                  <>
+                    <Button
+                      className="m-3"
+                      variant="primary"
+                      onClick={() => {
+                        setMode("1-player");
+                      }}
+                    >
+                      1-Player
+                    </Button>
+                    <Button
+                      className="mx-3 mb-3"
+                      variant="secondary"
+                      onClick={() => {
+                        setMode("2-player");
+                      }}
+                    >
+                      2-Player
+                    </Button>
+                  </>
+                )}
+                {mode === "2-player" && (
+                  <>
+                    <Button
+                      className="m-3"
+                      variant="secondary"
+                      onClick={() => {
+                        setMode("1-player");
+                      }}
+                    >
+                      1-Player
+                    </Button>
+                    <Button
+                      className="mx-3 mb-3"
+                      variant="primary"
+                      onClick={() => {
+                        setMode("2-player");
+                      }}
+                    >
+                      2-Player
+                    </Button>
+                  </>
+                )}
+              </Card>
             </Col>
             <Col xs={8} md={4} lg={3}>
-              <Tetris playerInfo={`Player 1: ${username}`} focus={gameFocus} />
+              <Tetris
+                username={username}
+                twoPlayerMode={mode === "2-player"}
+                focus={gameFocus}
+              />
             </Col>
-            <Col md={4} lg={3} className="d-none d-md-block">
-              <Tetris playerInfo="Player 2: username" focus={false} />
-            </Col>
+            {mode === "2-player" && (
+              <Col md={4} lg={3} className="d-none d-md-block">
+                <Tetris
+                  username="..."
+                  twoPlayerMode={mode === "2-player"}
+                  primaryPlayer={false}
+                  focus={false}
+                />
+              </Col>
+            )}
           </Row>
         </Container>
       )}

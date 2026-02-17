@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -10,15 +10,34 @@ import ToastContainer from "react-bootstrap/ToastContainer";
 
 const URL = "http://localhost:3001";
 
-export default function AccountModal({ show, setShow, setUsernameParent }) {
+export default function AccountModal({
+  show,
+  setShow,
+  usernameParent,
+  setUsernameParent,
+}) {
   const [view, setView] = useState("login");
   const [toast, setToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordCheck, setPasswordCheck] = useState("");
+  const [dismissable, setDismissable] = useState(false);
 
-  const handleClose = () => setShow(false);
+  useEffect(() => {
+    if (usernameParent) {
+      setDismissable(true);
+    }
+  }, [usernameParent]);
+
+  const handleClose = () => {
+    if (dismissable || username) {
+      setShow(false);
+    } else {
+      setToastMessage("User log-in required");
+      setToast(true);
+    }
+  };
 
   const handleLogin = async () => {
     const post = await fetch(`${URL}/login`, {

@@ -376,7 +376,23 @@ class Tetris {
       next: this.nextBlock.miniGrid,
       gameOver: this.gameOver,
     };
-    return this.currentState;
+
+    const initState = {
+      grid: this.grid,
+      score: this.score,
+      next: Array(NEXT_HEIGHT)
+        .fill(null)
+        .map(() => {
+          return Array(NEXT_WIDTH).fill(0);
+        }),
+      gameOver: this.gameOver,
+    };
+
+    if (this.onUpdateHandle) {
+      this.onUpdateHandle(initState);
+    }
+
+    return initState;
   }
 
   setPlayer(player) {
@@ -393,23 +409,33 @@ class Tetris {
   }
 
   moveLeft() {
-    this.block.moveLeft();
+    if (this.isRunning) {
+      this.block.moveLeft();
+    }
   }
 
   moveRight() {
-    this.block.moveRight();
+    if (this.isRunning) {
+      this.block.moveRight();
+    }
   }
 
   moveDown() {
-    this.block.moveDown();
+    if (this.isRunning) {
+      this.block.moveDown();
+    }
   }
 
   rotateLeft() {
-    this.block.rotateLeft();
+    if (this.isRunning) {
+      this.block.rotateLeft();
+    }
   }
 
   rotateRight() {
-    this.block.rotateRight();
+    if (this.isRunning) {
+      this.block.rotateRight();
+    }
   }
 
   update() {
@@ -453,6 +479,11 @@ class Tetris {
       score: this.score,
       gameOver: this.gameOver,
     };
+
+    if (this.onUpdateHandle) {
+      this.onUpdateHandle(this.currentState);
+    }
+
     return this.currentState;
   }
 
@@ -496,9 +527,6 @@ class Tetris {
     this.running = true;
     this.interval = setInterval(() => {
       const state = this.update();
-      if (this.onUpdateHandle) {
-        this.onUpdateHandle(state);
-      }
 
       if (state.gameOver) {
         this.stop();

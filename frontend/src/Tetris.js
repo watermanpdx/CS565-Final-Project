@@ -5,8 +5,14 @@ import { useState, useEffect } from "react";
 import { socket } from "./socket";
 
 import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
 
-export default function Tetris({ playerInfo, focus }) {
+export default function Tetris({
+  username,
+  primaryPlayer = true,
+  twoPlayerMode = false,
+  focus,
+}) {
   const GRID_WIDTH = 10;
   const GRID_HEIGHT = 20;
   const [grid, setGrid] = useState(
@@ -29,6 +35,7 @@ export default function Tetris({ playerInfo, focus }) {
 
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [running, setRunning] = useState(false);
 
   const BLOCK_TYPES = [
     "block-none",
@@ -40,6 +47,11 @@ export default function Tetris({ playerInfo, focus }) {
     "j-block",
     "t-block",
   ];
+
+  // handle game-mode change
+  useEffect(() => {
+    socket.emit("reset");
+  }, [twoPlayerMode]);
 
   // handle socket.io communication
   useEffect(() => {
@@ -54,12 +66,20 @@ export default function Tetris({ playerInfo, focus }) {
       setGameOver(data.gameOver);
     }
 
+    function onRunning(value) {
+      setRunning(value);
+    }
+
     socket.on("connect", onConnect);
     socket.on("render", renderGrid);
+    socket.on("running-status", (value) => {
+      onRunning(value);
+    });
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("render", renderGrid);
+      socket.off("running-status", onRunning);
     };
   }, []);
 
@@ -106,10 +126,16 @@ export default function Tetris({ playerInfo, focus }) {
     }
   }, [focus]);
 
+  const handleStart = () => {
+    socket.emit("start");
+  };
+
   return (
     <>
       <Card className="game-window">
-        <p className="player-info">{playerInfo}</p>
+        <p className="player-info">
+          Player-{primaryPlayer ? "1" : "2"}: {username}
+        </p>
         <Card.Body className="game-body">
           <BlockZone
             className="play-window"
@@ -123,6 +149,20 @@ export default function Tetris({ playerInfo, focus }) {
           </div>
         </Card.Body>
       </Card>
+      {primaryPlayer && (
+        <Card className="game-controls mt-3">
+          {!running && (
+            <Button variant="primary" onClick={handleStart}>
+              Start
+            </Button>
+          )}
+          {running && (
+            <Button variant="secondary" onClick={handleStart}>
+              Restart
+            </Button>
+          )}
+        </Card>
+      )}
     </>
   );
 }

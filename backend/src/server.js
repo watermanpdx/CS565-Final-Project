@@ -42,10 +42,21 @@ db.prepare(
 // Socket.IO communication
 io.on("connection", (socket) => {
   console.log(`Connected to socket.id: ${socket.id}`);
+  socket.emit("running-status", game.isRunning());
   if (!game.isRunning()) {
     game.init();
-    game.run();
   }
+
+  socket.on("start", (socket) => {
+    game.init();
+    game.run();
+    io.emit("running-status", game.isRunning());
+  });
+
+  socket.on("reset", (socket) => {
+    game.stop();
+    io.emit("running-status", game.isRunning());
+  });
 
   socket.on("moveLeft", (socket) => {
     game.moveLeft();
@@ -76,6 +87,7 @@ game.onUpdate((state) => {
 
 game.onEnd((state, durationMs) => {
   addScore(game.getPlayer(), state.score, durationMs);
+  io.emit("running-status", game.isRunning());
 });
 
 io.on("disconnect", (socket) => {});

@@ -81,6 +81,8 @@ To store score data to the database, I also modified the core `Tetris` code. I c
 
 One open issue, is that although my database is now implemented, I have basic login and score logic implemented, and a playable game environment running, it only supports one player. Splitting into a two player mode will require additional functionality, and a means for the server to distinguish between clients. I was initially going to try and split this out in this update, but found myself asking too many questions about the split while simultaneously trying to figure out the database and `REST` implementations. I chose to leave out the two-player management in this pass for simplicity. This will be the focus of my next major update.
 
+## Two Player Split
+
 # References
 
 https://www.geeksforgeeks.org/web-tech/express-js-req-query-property/
