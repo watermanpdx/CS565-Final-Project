@@ -9,12 +9,13 @@ const sql = require("better-sqlite3");
 const db = new sql("database.db");
 
 const Tetris = require("./tetris.js");
-const game = new Tetris();
 
 const { Server } = require("socket.io");
 const io = new Server(server);
 
 const MAX_SCORE_ENTRIES = 10000;
+
+let games = [];
 
 // Database (setup)
 db.prepare(
@@ -41,64 +42,133 @@ db.prepare(
 
 // Socket.IO communication
 io.on("connection", (socket) => {
+  let game = null;
+
   console.log(`Connected to socket.id: ${socket.id}`);
-  socket.emit("running-status", game.isRunning());
-  if (!game.isRunning()) {
-    game.init();
-  }
 
-  socket.on("start", (socket) => {
-    game.init();
-    game.run();
-    io.emit("running-status", game.isRunning());
+  socket.on("username", (data) => {
+    const username = data.username;
+    console.log(`Connected to user: ${username}`);
+    game = games.find((g) => {
+      return g.player === username;
+    });
+    if (game) {
+      // game exists, reattach and update socket reference
+      game.onUpdate((g) => {
+        onUpdate(g, socket);
+      });
+      game.onEnd((g) => {
+        onEnd(g, socket);
+      });
+
+      socket.emit("render", game.currentState);
+      socket.emit("running-status", game.isRunning());
+    } else {
+      // create new game
+      game = new Tetris(
+        (onStartHandle = null),
+        (onUpdateHandle = (g) => {
+          onUpdate(g, socket);
+        }),
+        (onEndHandle = (g) => {
+          onEnd(g, socket);
+        }),
+        (player = username),
+      );
+      games.push(game);
+    }
   });
 
-  socket.on("reset", (socket) => {
-    game.stop();
-    io.emit("running-status", game.isRunning());
+  socket.on("start", () => {
+    if (game) {
+      game.init();
+      game.run();
+      socket.emit("running-status", game.isRunning());
+    }
   });
 
-  socket.on("moveLeft", (socket) => {
-    game.moveLeft();
+  socket.on("reset", () => {
+    if (game) {
+      // stop game, teardown
+      game.stop();
+      const username = game.player;
+      const index = games.indexOf(game);
+      if (index !== -1) {
+        games.splice(index, 1);
+      }
+
+      // create new game
+      game = new Tetris(
+        (onStartHandle = null),
+        (onUpdateHandle = (g) => {
+          onUpdate(g, socket);
+        }),
+        (onEndHandle = (g) => {
+          onEnd(g, socket);
+        }),
+        (player = username),
+      );
+      games.push(game);
+
+      socket.emit("render", game.currentState);
+      socket.emit("running-status", game.isRunning());
+    }
   });
 
-  socket.on("moveRight", (socket) => {
-    game.moveRight();
+  socket.on("moveLeft", () => {
+    if (game) {
+      game.moveLeft();
+    }
   });
 
-  socket.on("moveDown", (socket) => {
-    game.moveDown();
+  socket.on("moveRight", () => {
+    if (game) {
+      game.moveRight();
+    }
   });
 
-  socket.on("rotateLeft", (socket) => {
-    game.rotateLeft();
+  socket.on("moveDown", () => {
+    if (game) {
+      game.moveDown();
+    }
   });
 
-  socket.on("rotateRight", (socket) => {
-    game.rotateRight();
+  socket.on("rotateLeft", () => {
+    if (game) {
+      game.rotateLeft();
+    }
   });
 
-  //socket.emit("render", game.init());
+  socket.on("rotateRight", () => {
+    if (game) {
+      game.rotateRight();
+    }
+  });
 });
 
-game.onUpdate((state) => {
-  io.emit("render", state);
-});
+function onUpdate(game, socket) {
+  socket.emit("render", game.currentState);
+}
 
-game.onEnd((state, durationMs) => {
-  addScore(game.getPlayer(), state.score, durationMs);
-  io.emit("running-status", game.isRunning());
-});
-
-io.on("disconnect", (socket) => {});
-
-function addScore(username, score, durationMs) {
-  if (username && score > 0) {
+function onEnd(game, socket) {
+  // save score
+  if (game.player && game.score > 0) {
     db.prepare(
       "INSERT INTO scores (username, score, durationMs, date) VALUES (?, ?, ?, ?)",
-    ).run(username, score, durationMs, new Date().toISOString());
+    ).run(game.player, game.score, game.durationMs, new Date().toISOString());
   }
+
+  // remove from games array
+  const index = games.indexOf(game);
+  if (index !== -1) {
+    games.splice(index, 1);
+  }
+
+  // inform frontend of state
+  socket.emit("running-status", game.isRunning());
 }
+
+io.on("disconnect", () => {});
 
 // REST and routing
 app.use(cors({ origin: "http://localhost:3000" }));

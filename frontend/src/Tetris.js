@@ -57,6 +57,7 @@ export default function Tetris({
   useEffect(() => {
     function onConnect() {
       console.log(`Connected to socket.id: ${socket.id}`);
+      socket.emit("username", { username: username });
     }
 
     function renderGrid(data) {
@@ -81,7 +82,7 @@ export default function Tetris({
       socket.off("render", renderGrid);
       socket.off("running-status", onRunning);
     };
-  }, []);
+  }, [username]);
 
   // handle user input
   useEffect(() => {

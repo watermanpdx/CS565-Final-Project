@@ -83,6 +83,8 @@ One open issue, is that although my database is now implemented, I have basic lo
 
 ## Two Player Split
 
+indexOf and index guarding `f (index !== -1)`
+
 # References
 
 https://www.geeksforgeeks.org/web-tech/express-js-req-query-property/

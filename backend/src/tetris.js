@@ -340,11 +340,16 @@ class TBlock extends Block {
 // Core game class ------------------------------------------------------------
 const BLOCKS = [SquareBlock, LineBlock, SBlock, ZBlock, LBlock, JBlock, TBlock];
 class Tetris {
-  constructor() {
-    this.onStartHandle = null;
-    this.onUpdateHandle = null;
-    this.onEndHandle = null;
-    this.player = null;
+  constructor(
+    onStartHandle = null,
+    onUpdateHandle = null,
+    onEndHandle = null,
+    player = null,
+  ) {
+    this.onStartHandle = onStartHandle;
+    this.onUpdateHandle = onUpdateHandle;
+    this.onEndHandle = onEndHandle;
+    this.player = player;
 
     this.init();
   }
@@ -368,6 +373,7 @@ class Tetris {
 
     this.level = 0;
     this.score = 0;
+    this.durationMs = 0;
     this.gameOver = false;
 
     this.currentState = {
@@ -389,18 +395,10 @@ class Tetris {
     };
 
     if (this.onUpdateHandle) {
-      this.onUpdateHandle(initState);
+      this.onUpdateHandle(this);
     }
 
     return initState;
-  }
-
-  setPlayer(player) {
-    this.player = player;
-  }
-
-  getPlayer(player) {
-    return this.player;
   }
 
   getRandomBlock() {
@@ -481,7 +479,7 @@ class Tetris {
     };
 
     if (this.onUpdateHandle) {
-      this.onUpdateHandle(this.currentState);
+      this.onUpdateHandle(this);
     }
 
     return this.currentState;
@@ -520,7 +518,7 @@ class Tetris {
 
   run() {
     if (this.onStartHandle) {
-      this.onStartHandle();
+      this.onStartHandle(this);
     }
     this.startTime = Date.now();
 
@@ -538,8 +536,10 @@ class Tetris {
     if (this.running) {
       clearInterval(this.interval);
       this.running = false;
+      this.durationMs = Date.now() - this.startTime;
+
       if (this.onEndHandle) {
-        this.onEndHandle(this.currentState, Date.now() - this.startTime);
+        this.onEndHandle(this);
       }
     }
   }
