@@ -36,6 +36,7 @@ export default function Tetris({
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [running, setRunning] = useState("not-started");
+  const [displayName, setDisplayName] = useState(null);
 
   const BLOCK_TYPES = [
     "block-none",
@@ -62,8 +63,17 @@ export default function Tetris({
       console.log(`Connected to socket.id: ${socket.id}`);
     }
 
+    function onPlayer(data) {
+      const { primary, secondary } = data;
+      console.log(primary, secondary);
+      if (primaryPlayer) {
+        setDisplayName(primary);
+      } else {
+        setDisplayName(secondary);
+      }
+    }
+
     function renderGrid(data) {
-      console.log(data);
       setGrid(data.grid);
       setScore(data.score);
       setNextBlock(data.next);
@@ -75,20 +85,20 @@ export default function Tetris({
     }
 
     socket.on("connect", onConnect);
+    socket.on("player-update", onPlayer);
+    socket.on("running-status", onRunning);
     if (primaryPlayer) {
       socket.on("render-primary", renderGrid);
     } else {
       socket.on("render-secondary", renderGrid);
     }
-    socket.on("running-status", (value) => {
-      onRunning(value);
-    });
 
     return () => {
       socket.off("connect", onConnect);
+      socket.off("player-update", onPlayer);
+      socket.off("running-status", onRunning);
       socket.off("render-primary", renderGrid);
       socket.off("render-secondary", renderGrid);
-      socket.off("running-status", onRunning);
     };
   }, [username, primaryPlayer, twoPlayerMode]);
 
@@ -143,7 +153,7 @@ export default function Tetris({
     <>
       <Card className="game-window">
         <p className="player-info">
-          Player-{primaryPlayer ? "1" : "2"}: {username}
+          Player-{primaryPlayer ? "1" : "2"}: {displayName}
         </p>
         <Card.Body className="game-body">
           <BlockZone

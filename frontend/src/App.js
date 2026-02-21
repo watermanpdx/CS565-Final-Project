@@ -21,7 +21,9 @@ const URL = "http://localhost:3001";
 
 export default function App() {
   const [view, setView] = useState("home");
-  const [mode, setMode] = useState("1-player");
+  const [mode, setMode] = useState(
+    sessionStorage.getItem("mode") || "1-player",
+  );
   const [username, setUsername] = useState(sessionStorage.getItem("username"));
   const [showHowTo, setShowHowTo] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
@@ -37,7 +39,8 @@ export default function App() {
     } else {
       sessionStorage.removeItem("username", username);
     }
-  }, [username]);
+    sessionStorage.setItem("mode", mode);
+  }, [username, mode]);
 
   const togglePlayerMode = () => {
     if (mode === "1-player") {

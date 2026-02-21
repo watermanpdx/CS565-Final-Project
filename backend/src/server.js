@@ -50,6 +50,7 @@ class Room {
       game: new Tetris(),
       readyStart: false,
     };
+    this.onPlayerHandle = null;
 
     if (username) {
       this.registerPlayer(username);
@@ -61,15 +62,27 @@ class Room {
   }
 
   registerPlayer(username) {
+    let result = false;
     if (this.slot1.game.player === null) {
       this.slot1.game.player = username;
-      return true;
+      result = true;
     } else if (this.slot2.game.player === null) {
       this.slot2.game.player = username;
-      return true;
-    } else {
-      return false;
+      result = true;
     }
+
+    if (this.onPlayerHandle) {
+      this.onPlayerHandle(this);
+    }
+    return result;
+  }
+
+  attachOnPlayer(handle) {
+    this.onPlayerHandle = handle;
+  }
+
+  removeOnPlayer(handle) {
+    this.onPlayerHandle = null;
   }
 
   isActiveRoom(username, twoPlayerMode) {
@@ -212,8 +225,10 @@ io.on("connection", (socket) => {
 
     room = rooms.joinRoom(username, twoPlayerMode);
 
-    let game = null;
     if (primaryPlayer) {
+      room.attachOnPlayer(onPlayer);
+      onPlayer(room);
+
       primaryGame = room.getPrimaryGame(username);
       primaryGame.attachOnUpdate(onUpdate);
       primaryGame.attachOnEnd(onEnd);
@@ -297,6 +312,19 @@ io.on("connection", (socket) => {
       secondaryGame.removeOnEnd(onEnd);
     }
   });
+
+  function onPlayer() {
+    if (room) {
+      socket.emit("player-update", {
+        primary: room.getPrimaryGame(username)
+          ? room.getPrimaryGame(username).player
+          : null,
+        secondary: room.getSecondaryGame(username)
+          ? room.getSecondaryGame(username).player
+          : null,
+      });
+    }
+  }
 
   function onUpdate(game) {
     if (primaryGame) {
