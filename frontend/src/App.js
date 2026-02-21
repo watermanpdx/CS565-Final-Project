@@ -148,7 +148,7 @@ export default function App() {
             {mode === "2-player" && (
               <Col md={4} lg={3} className="d-none d-md-block">
                 <Tetris
-                  username="<waiting>"
+                  username={username}
                   twoPlayerMode={mode === "2-player"}
                   primaryPlayer={false}
                   focus={false}

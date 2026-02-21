@@ -63,6 +63,7 @@ export default function Tetris({
     }
 
     function renderGrid(data) {
+      console.log(data);
       setGrid(data.grid);
       setScore(data.score);
       setNextBlock(data.next);
@@ -74,14 +75,19 @@ export default function Tetris({
     }
 
     socket.on("connect", onConnect);
-    socket.on("render", renderGrid);
+    if (primaryPlayer) {
+      socket.on("render-primary", renderGrid);
+    } else {
+      socket.on("render-secondary", renderGrid);
+    }
     socket.on("running-status", (value) => {
       onRunning(value);
     });
 
     return () => {
       socket.off("connect", onConnect);
-      socket.off("render", renderGrid);
+      socket.off("render-primary", renderGrid);
+      socket.off("render-secondary", renderGrid);
       socket.off("running-status", onRunning);
     };
   }, [username, primaryPlayer, twoPlayerMode]);

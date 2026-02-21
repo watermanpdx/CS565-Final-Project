@@ -39,65 +39,102 @@ db.prepare(
 ).run();
 
 class Room {
-  constructor(game, twoPlayerMode) {
+  constructor(twoPlayerMode, username = null) {
+    this.id = Math.floor(Math.random() * 1000000);
     this.twoPlayerMode = twoPlayerMode;
-    this.slot1 = { game: game, player: game.player, readyStart: false };
-    this.slot2 = { game: null, player: null, readyStart: false };
+    this.slot1 = {
+      game: new Tetris(),
+      readyStart: false,
+    };
+    this.slot2 = {
+      game: new Tetris(),
+      readyStart: false,
+    };
+
+    if (username) {
+      this.registerPlayer(username);
+    }
   }
 
-  addGame(game) {
-    if (game && this.twoPlayerMode && this.slot1.game === null) {
-      this.slot1.game = game;
-      this.slot1.player = game.player;
+  isAvailable() {
+    return this.slot1.game.player === null || this.slot2.game.player === null;
+  }
+
+  registerPlayer(username) {
+    if (this.slot1.game.player === null) {
+      this.slot1.game.player = username;
+      return true;
+    } else if (this.slot2.game.player === null) {
+      this.slot2.game.player = username;
       return true;
     } else {
       return false;
     }
   }
 
-  hasGame(game) {
-    return game && (this.slot1.game === game || this.slot2.game === game);
+  isActiveRoom(username, twoPlayerMode) {
+    return (
+      this.twoPlayerMode === twoPlayerMode &&
+      (this.slot1.game.player === username ||
+        this.slot2.game.player === username)
+    );
   }
 
-  getGame(username, twoPlayerMode) {
-    if (
-      this.twoPlayerMode === twoPlayerMode &&
-      this.slot1.player === username
-    ) {
+  getPrimaryGame(username) {
+    if (this.slot1.game.player === username) {
       return this.slot1.game;
-    } else if (
-      this.twoPlayerMode === twoPlayerMode &&
-      this.slot2.player === username
-    ) {
+    } else if (this.slot2.game.player === username) {
       return this.slot2.game;
     } else {
       return null;
     }
   }
 
-  flagGameReady(game) {
-    if (game && this.slot1.game === game) {
-      this.slot1.readyStart = true;
+  getSecondaryGame(username) {
+    if (this.slot1.game.player === username) {
+      return this.slot2.game;
+    } else if (this.slot2.game.player === username) {
+      return this.slot1.game;
     } else {
-      this.slot2.readyStart = true;
+      return null;
     }
   }
 
-  readyToStart() {
-    // ready if one-player mode, or both games ready
-    return (
-      !this.twoPlayerMode || (this.slot1.readyStart && this.slot2.readyStart)
-    );
+  start(username) {
+    if (!this.twoPlayerMode) {
+      // if one-player no need to wait, just start
+      this.slot1.readyStart = true;
+      this.slot1.game.init();
+      this.slot1.game.run();
+    } else {
+      // if two-player, only start when both are ready
+      if (this.slot1.game.player === username) {
+        this.slot1.readyStart = true;
+      } else if (this.slot2.game.player === username) {
+        this.slot2.readyStart = true;
+      }
+
+      if (this.slot1.readyStart && this.slot2.readyStart) {
+        this.slot1.game.init();
+        this.slot1.game.run();
+        this.slot2.game.init();
+        this.slot2.game.run();
+      }
+    }
   }
 
-  readyForRemoval() {
-    // ready if one-player mode, only one game pending, or both games complete
-    return (
-      !this.twoPlayerMode ||
-      !this.slot1.game ||
-      !this.slot2.game ||
-      (!this.slot1.game.isRunning() && !this.slot2.game.isRunning())
-    );
+  stop() {
+    if (!this.twoPlayerMode) {
+      this.slot1.game.stop();
+    }
+  }
+
+  isRunning() {
+    if (!this.twoPlayerMode) {
+      return this.slot1.game.isRunning();
+    } else {
+      return this.slot1.game.isRunning() && this.slot2.game.isRunning();
+    }
   }
 }
 
@@ -106,50 +143,48 @@ class Rooms {
     this.rooms = [];
   }
 
-  addGame(game, twoPlayerMode) {
-    if (!this.getGame(game, twoPlayerMode)) {
-      if (twoPlayerMode) {
-        // if two-player, try and add to a waiting room first
-        for (const room of this.rooms) {
-          if (room.addGame(game)) {
-            this.rooms.push(room);
-            return room;
-          }
-        }
+  joinRoom(username, twoPlayerMode) {
+    // check if already in room
+    let room = this.findActiveRoom(username, twoPlayerMode);
+    // check for available room
+    if (!room) {
+      room = this.rooms.find((r) => {
+        return r.isAvailable();
+      });
+      if (room) {
+        room.registerPlayer(username);
       }
-      // else create a new room
-      const room = new Room(game, twoPlayerMode);
-      this.rooms.push(room);
-      return room;
-    } else {
-      return null;
     }
+    // create new room
+    if (!room) {
+      room = new Room(twoPlayerMode, username);
+      this.rooms.push(room);
+    }
+
+    console.log(
+      `Room id-${room.id}, mode: ${this.twoPlayerMode ? "2-player" : "1-player"}`,
+    );
+    console.log(
+      `  Players: ${room.slot1.game.player}, ${room.slot2.game.player}`,
+    );
+
+    return room;
   }
 
-  getRoom(username, twoPlayerMode) {
+  findActiveRoom(username, twoPlayerMode) {
     const room = this.rooms.find((r) => {
-      return r.getGame(username, twoPlayerMode) !== null;
+      return r.isActiveRoom(username, twoPlayerMode);
     });
     return room;
   }
 
-  getGame(username, twoPlayerMode) {
-    const room = this.getRoom(username, twoPlayerMode);
-    if (room) {
-      return room.getGame(username, twoPlayerMode);
-    } else {
-      return null;
-    }
-  }
-
-  cleanup(game) {
-    const room = this.rooms.find((r) => {
-      return r.hasGame(game);
-    });
-    if (room && room.readyForRemoval()) {
-      const index = this.rooms.indexOf(room);
-      if (index !== -1) {
-        this.rooms.splice(index, 1);
+  cleanup() {
+    for (const room of this.rooms) {
+      if (!room.isRunning()) {
+        const index = this.rooms.indexOf(room);
+        if (index !== -1) {
+          this.rooms.splice(index, 1);
+        }
       }
     }
   }
@@ -159,125 +194,117 @@ const rooms = new Rooms();
 
 // Socket.IO communication
 io.on("connection", (socket) => {
-  let game = null;
   let room = null;
-
+  let primaryGame = null;
+  let secondaryGame = null;
   let username = null;
-  let primaryPlayer = true;
-  let twoPlayerMode = false;
 
   console.log(`Connected to socket.id: ${socket.id}`);
 
   socket.on("game-connect", (data) => {
     username = data.username;
-    primaryPlayer = data.primaryPlayer;
-    twoPlayerMode = data.twoPlayerMode;
+    const primaryPlayer = data.primaryPlayer;
+    const twoPlayerMode = data.twoPlayerMode;
 
     console.log(
-      `Connected to user: ${username}, primary-player: ${primaryPlayer}, two-player-mode: ${twoPlayerMode}`,
+      `Connecting ${twoPlayerMode ? "2-player" : "1-player"} game for: ${username}`,
     );
 
-    room = rooms.getRoom(username, twoPlayerMode);
-    game = rooms.getGame(username, twoPlayerMode);
+    room = rooms.joinRoom(username, twoPlayerMode);
 
-    if (game) {
-      // game exists, reattach and update socket reference
-      game.attachOnUpdate(onUpdate);
-      game.attachOnEnd(onEnd);
+    let game = null;
+    if (primaryPlayer) {
+      primaryGame = room.getPrimaryGame(username);
+      primaryGame.attachOnUpdate(onUpdate);
+      primaryGame.attachOnEnd(onEnd);
 
-      socket.emit("render", game.currentState);
-      socket.emit(
-        "running-status",
-        game.isRunning() ? "running" : "not-started",
-      );
+      socket.emit("render-primary", primaryGame.currentState);
     } else {
-      // game doesn't exist, create new game
-      if (primaryPlayer) {
-        game = new Tetris(username);
-        game.attachOnUpdate(onUpdate);
-        game.attachOnEnd(onEnd);
+      secondaryGame = room.getSecondaryGame(username);
+      secondaryGame.attachOnUpdate(onUpdate);
+      secondaryGame.attachOnEnd(onEnd);
 
-        // find available room or start new one
-        room = rooms.addGame(game, twoPlayerMode);
-      }
+      socket.emit("render-secondary", secondaryGame.currentState);
     }
+
+    socket.emit("running-status", room.isRunning() ? "running" : "not-started");
   });
 
   socket.on("start", () => {
-    console.log("start", !!room, !!game);
-    if (game && room) {
-      room.flagGameReady(game);
-
-      if (room.readyToStart()) {
-        game.init();
-        game.run();
-        socket.emit(
-          "running-status",
-          game.isRunning() ? "running" : "not-started",
-        );
-      }
+    if (room) {
+      room.start(username);
+      socket.emit(
+        "running-status",
+        room.isRunning() ? "running" : "not-started",
+      );
     }
   });
 
   socket.on("reset", () => {
-    if (game && room && room.readyForRemoval()) {
-      // stop game, teardown
-      game.stop();
-      rooms.cleanup(game);
+    if (room) {
+      room.stop();
 
-      // create new game
-      game = new Tetris(username);
-
-      // find available room or add to new one
-      room = rooms.addGame(game);
-
-      socket.emit("render", game.currentState);
+      if (primaryGame) {
+        socket.emit("render-primary", primaryGame.currentState);
+      }
+      if (secondaryGame) {
+        socket.emit("render-secondary", secondaryGame.currentState);
+      }
       socket.emit(
         "running-status",
-        game.isRunning() ? "running" : "not-started",
+        room.isRunning() ? "running" : "not-started",
       );
     }
   });
 
   socket.on("moveLeft", () => {
-    if (primaryPlayer && game) {
-      game.moveLeft();
+    if (primaryGame) {
+      primaryGame.moveLeft();
     }
   });
 
   socket.on("moveRight", () => {
-    if (primaryPlayer && game) {
-      game.moveRight();
+    if (primaryGame) {
+      primaryGame.moveRight();
     }
   });
 
   socket.on("moveDown", () => {
-    if (primaryPlayer && game) {
-      game.moveDown();
+    if (primaryGame) {
+      primaryGame.moveDown();
     }
   });
 
   socket.on("rotateLeft", () => {
-    if (primaryPlayer && game) {
-      game.rotateLeft();
+    if (primaryGame) {
+      primaryGame.rotateLeft();
     }
   });
 
   socket.on("rotateRight", () => {
-    if (primaryPlayer && game) {
-      game.rotateRight();
+    if (primaryGame) {
+      primaryGame.rotateRight();
     }
   });
 
   socket.on("disconnect", () => {
-    if (game) {
-      game.removeOnUpdate(onUpdate);
-      game.removeOnEnd(onEnd);
+    if (primaryGame) {
+      primaryGame.removeOnUpdate(onUpdate);
+      primaryGame.removeOnEnd(onEnd);
+    }
+    if (secondaryGame) {
+      secondaryGame.removeOnUpdate(onUpdate);
+      secondaryGame.removeOnEnd(onEnd);
     }
   });
 
   function onUpdate(game) {
-    socket.emit("render", game.currentState);
+    if (primaryGame) {
+      socket.emit("render-primary", primaryGame.currentState);
+    }
+    if (secondaryGame) {
+      socket.emit("render-secondary", secondaryGame.currentState);
+    }
   }
 
   function onEnd(game) {
@@ -289,7 +316,7 @@ io.on("connection", (socket) => {
     }
 
     // remove from rooms array if both complete
-    rooms.cleanup(game);
+    rooms.cleanup();
 
     // inform frontend of state
     socket.emit("running-status", game.isRunning() ? "running" : "not-started");
