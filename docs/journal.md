@@ -81,11 +81,24 @@ To store score data to the database, I also modified the core `Tetris` code. I c
 
 One open issue, is that although my database is now implemented, I have basic login and score logic implemented, and a playable game environment running, it only supports one player. Splitting into a two player mode will require additional functionality, and a means for the server to distinguish between clients. I was initially going to try and split this out in this update, but found myself asking too many questions about the split while simultaneously trying to figure out the database and `REST` implementations. I chose to leave out the two-player management in this pass for simplicity. This will be the focus of my next major update.
 
-## Two Player Split
+## Two-Player Support
 
-indexOf and index guarding `f (index !== -1)`
+Branch: [`feature/2-player-mode`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/2-player-mode)
+Commit: []()
 
-states again, reset into App from Tetris
+In this section I expanded the game support from one-player to two-player to make it possible for players to play side-by-side from separate browsers. This update ended up being very challenging and time-consuming. Unfortunately, it also required heavy refactoring and reorganization of code.
+
+The primary issues that I faced were architectural; I simply made design decisions that did not align well socket communication, or complicated it. My original plan was to have each `<Tetris/>` frontend component communicate with an equivalent `Tetris` class on the backend, each sharing their own socket communication. Unfortunately, this caused two major complications: 1. I did not fully appreciate that the socket communication was applied to the _complete_ client (not each `<Tetris/>` component), and 2. I lacked a clear strategy of how the 4 `<Tetris/>` objects would coordinate with one-another as 2 games. In short, this lead to a logical mess both in communication and state-management. After several hours and iterations over the code I ultimately had to fully restructure the game management and communication.
+
+The first major change I made was to introduce the concept of "rooms". Rather than trying to synchronize "independent" game objects (which at any given moment may or may not exist), a room acts as a container for games to exist in, and for users to connect to. This eased how game states were synchronized (start together, prevent shutdown if the other player game still running, etc.), as well as how the games were connected. Initially, I struggled with how to render the "other" player game because it was "owned" by the "player-2" `<Tetris/>` component; I actually had 4 `Tetris` games! The `Room` and `Rooms` classes helped by brokering a game-space that both clients could connect to.
+
+Once this was established, I still encountered issues with controlling and rendering the appropriate game. I encountered issues like the same game rendering to both `<Tetris/>` components, "flickering" double-games, and many, many unexpected states. Ultimately, I found that I was simply trying to load too much into "common" messages within one socket. The main culprit being the "render" message. On "render" the server sends the current state of `Tetris` to `<Tetris/>` for rendering. I initially believed, that by passing `username` info through another message, `game-connect`, I was encoding two communication channels. However, I was really just merging together two communication streams into one message resulting in race-conditions on which content was last sent. I was able to resolve this by splitting `render` into two distinct messages `render-primary` and `render-secondary`.
+
+I also encountered issues with syncing player-name info and running states (between games) to the frontend `<Tetris/>` components for player-name rendering and start/reset button control. Considering the dependency on socket.io for game state coordination I chose to encode this information into sockets as well. This helped with keeping all game states under the control of the central rooms. However, to keep socket management within `server.js` I chose to link the socket messaging to the rooms via callbacks. As with earlier usage with the `Tetris` class this was very helpful. However, with multiple `<Tetris/>` components it was important to maintain multiple callbacks, each referencing different contexts and even different sockets (cases where the browser reloaded). Careful attention was required to ensure callbacks were properly cleaned up, else dangling callbacks would induce undesired behavior. I am not yet confident that this is completely clean. This will need to be audited during final review.
+
+Last, while testing I identified that (due to multiple callbacks) duplicate scores were being written to the database on game-end. To resolve I added "UNIQUE" constraints on the scores table in the database, and explicitly removed the `onEnd()` callback upon write.
+
+In the next set of updates I intend on polishing the frontend styling. The core functionalities are now more-or-less in place, but elements like the leaderboard and modals could be heavily improved.
 
 # References
 

@@ -33,7 +33,7 @@ db.prepare(
     score INTEGER NOT NULL,
     durationMs INTEGER,
     date DATETIME,
-    FOREIGN KEY (username) REFERENCES users(username)
+    UNIQUE(username, score, durationMs, date)
   )  
 `,
 ).run();
@@ -77,19 +77,11 @@ io.on("connection", (socket) => {
 
       socket.emit("render-secondary", secondaryGame.currentState);
     }
-
-    //socket.emit("running-status", room.isRunning() ? "running" : "not-started");
   });
 
   socket.on("start", () => {
     if (room) {
       room.start(username);
-      /*
-      socket.emit(
-        "running-status",
-        room.isRunning() ? "running" : "not-started",
-      );
-      */
     }
   });
 
@@ -197,8 +189,9 @@ io.on("connection", (socket) => {
       ).run(game.player, game.score, game.durationMs, new Date().toISOString());
     }
 
-    // remove from rooms array if both complete
+    // clean up rooms and handles
     rooms.cleanup();
+    game.removeOnEnd(onEnd);
 
     // inform frontend of state
     socket.emit("running-status", game.isRunning() ? "running" : "not-started");
