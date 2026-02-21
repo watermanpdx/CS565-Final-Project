@@ -85,6 +85,8 @@ One open issue, is that although my database is now implemented, I have basic lo
 
 indexOf and index guarding `f (index !== -1)`
 
+states again, reset into App from Tetris
+
 # References
 
 https://www.geeksforgeeks.org/web-tech/express-js-req-query-property/

@@ -19,6 +19,33 @@ const BLOCK_ENUM = {
   T_BLOCK: 7,
 };
 
+// Callbacks class ------------------------------------------------------------
+class CallbackList {
+  constructor(context) {
+    this.context = context;
+    this.callHandles = [];
+  }
+
+  attach(handle) {
+    this.callHandles.push(handle);
+  }
+
+  remove(handle) {
+    const index = this.callHandles.indexOf(handle);
+    if (index !== -1) {
+      this.callHandles.splice(index, 1);
+    }
+  }
+
+  call() {
+    for (const handle of this.callHandles) {
+      if (handle) {
+        handle(this.context);
+      }
+    }
+  }
+}
+
 // Block (base) class ---------------------------------------------------------
 class Block {
   constructor(
@@ -340,16 +367,40 @@ class TBlock extends Block {
 // Core game class ------------------------------------------------------------
 const BLOCKS = [SquareBlock, LineBlock, SBlock, ZBlock, LBlock, JBlock, TBlock];
 class Tetris {
-  constructor(
-    onStartHandle = null,
-    onUpdateHandle = null,
-    onEndHandle = null,
-    player = null,
-  ) {
-    this.onStartHandle = onStartHandle;
-    this.onUpdateHandle = onUpdateHandle;
-    this.onEndHandle = onEndHandle;
+  constructor(player = null) {
     this.player = player;
+
+    this.onStartHandles = new CallbackList(this);
+    this.onUpdateHandles = new CallbackList(this);
+    this.onEndHandles = new CallbackList(this);
+
+    this.block = null;
+    this.nextBlock = null;
+
+    this.speed = START_SPEED;
+    this.speedTick = 0;
+
+    this.level = 0;
+    this.score = 0;
+    this.durationMs = 0;
+    this.gameOver = false;
+
+    this.grid = Array(GRID_HEIGHT)
+      .fill(null)
+      .map(() => {
+        return Array(GRID_WIDTH).fill(0);
+      });
+
+    this.blankState = {
+      grid: this.grid,
+      score: this.score,
+      next: Array(NEXT_HEIGHT)
+        .fill(null)
+        .map(() => {
+          return Array(NEXT_WIDTH).fill(0);
+        }),
+      gameOver: this.gameOver,
+    };
 
     this.init();
   }
@@ -383,22 +434,9 @@ class Tetris {
       gameOver: this.gameOver,
     };
 
-    const initState = {
-      grid: this.grid,
-      score: this.score,
-      next: Array(NEXT_HEIGHT)
-        .fill(null)
-        .map(() => {
-          return Array(NEXT_WIDTH).fill(0);
-        }),
-      gameOver: this.gameOver,
-    };
+    this.onUpdateHandles.call();
 
-    if (this.onUpdateHandle) {
-      this.onUpdateHandle(this);
-    }
-
-    return initState;
+    return this.currentState;
   }
 
   getRandomBlock() {
@@ -478,9 +516,7 @@ class Tetris {
       gameOver: this.gameOver,
     };
 
-    if (this.onUpdateHandle) {
-      this.onUpdateHandle(this);
-    }
+    this.onUpdateHandles.call();
 
     return this.currentState;
   }
@@ -517,9 +553,7 @@ class Tetris {
   }
 
   run() {
-    if (this.onStartHandle) {
-      this.onStartHandle(this);
-    }
+    this.onStartHandles.call();
     this.startTime = Date.now();
 
     this.running = true;
@@ -538,22 +572,32 @@ class Tetris {
       this.running = false;
       this.durationMs = Date.now() - this.startTime;
 
-      if (this.onEndHandle) {
-        this.onEndHandle(this);
-      }
+      this.onEndHandles.call();
     }
   }
 
-  onStart(handle) {
-    this.onStartHandle = handle;
+  attachOnStart(handle) {
+    this.onStartHandles.attach(handle);
   }
 
-  onUpdate(handle) {
-    this.onUpdateHandle = handle;
+  removeOnStart(handle) {
+    this.onStartHandles.remove(handles);
   }
 
-  onEnd(handle) {
-    this.onEndHandle = handle;
+  attachOnUpdate(handle) {
+    this.onUpdateHandles.attach(handle);
+  }
+
+  removeOnUpdate(handle) {
+    this.onUpdateHandles.remove(handle);
+  }
+
+  attachOnEnd(handle) {
+    this.onEndHandles.attach(handle);
+  }
+
+  removeOnEnd(handle) {
+    this.onEndHandles.remove(handle);
   }
 }
 

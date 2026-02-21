@@ -35,7 +35,7 @@ export default function Tetris({
 
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
-  const [running, setRunning] = useState(false);
+  const [running, setRunning] = useState("not-started");
 
   const BLOCK_TYPES = [
     "block-none",
@@ -48,16 +48,18 @@ export default function Tetris({
     "t-block",
   ];
 
-  // handle game-mode change
-  useEffect(() => {
-    socket.emit("reset");
-  }, [twoPlayerMode]);
-
   // handle socket.io communication
   useEffect(() => {
+    if (username) {
+      socket.emit("game-connect", {
+        username: username,
+        primaryPlayer: primaryPlayer,
+        twoPlayerMode: twoPlayerMode,
+      });
+    }
+
     function onConnect() {
       console.log(`Connected to socket.id: ${socket.id}`);
-      socket.emit("username", { username: username });
     }
 
     function renderGrid(data) {
@@ -82,7 +84,7 @@ export default function Tetris({
       socket.off("render", renderGrid);
       socket.off("running-status", onRunning);
     };
-  }, [username]);
+  }, [username, primaryPlayer, twoPlayerMode]);
 
   // handle user input
   useEffect(() => {
@@ -119,13 +121,13 @@ export default function Tetris({
     };
 
     // check focus first; else event-handlers override inputs elsewhere
-    if (focus) {
+    if (focus && primaryPlayer) {
       window.addEventListener("keydown", handleEvent);
       return () => {
         window.removeEventListener("keydown", handleEvent);
       };
     }
-  }, [focus]);
+  }, [primaryPlayer, focus]);
 
   const handleStart = () => {
     socket.emit("start");
@@ -152,12 +154,12 @@ export default function Tetris({
       </Card>
       {primaryPlayer && (
         <Card className="game-controls mt-3">
-          {!running && (
+          {running === "not-started" && (
             <Button variant="primary" onClick={handleStart}>
               Start
             </Button>
           )}
-          {running && (
+          {running === "running" && (
             <Button variant="secondary" onClick={handleStart}>
               Restart
             </Button>

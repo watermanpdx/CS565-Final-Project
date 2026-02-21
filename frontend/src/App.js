@@ -3,6 +3,8 @@ import "./App.css";
 import Tetris from "./Tetris.js";
 import AccountModal from "./Login.js";
 
+import { socket } from "./socket";
+
 import { useState, useEffect } from "react";
 
 import Container from "react-bootstrap/Container";
@@ -36,6 +38,16 @@ export default function App() {
       sessionStorage.removeItem("username", username);
     }
   }, [username]);
+
+  const togglePlayerMode = () => {
+    if (mode === "1-player") {
+      setMode("2-player");
+      socket.emit("reset");
+    } else if (mode === "2-player") {
+      setMode("1-player");
+      socket.emit("reset");
+    }
+  };
 
   return (
     <>
@@ -107,48 +119,22 @@ export default function App() {
               <MiniLeaderboard />
               <Card className="number-players-control">
                 {mode === "1-player" && (
-                  <>
-                    <Button
-                      className="m-3"
-                      variant="primary"
-                      onClick={() => {
-                        setMode("1-player");
-                      }}
-                    >
-                      1-Player
-                    </Button>
-                    <Button
-                      className="mx-3 mb-3"
-                      variant="secondary"
-                      onClick={() => {
-                        setMode("2-player");
-                      }}
-                    >
-                      2-Player
-                    </Button>
-                  </>
+                  <Button
+                    className="m-3"
+                    variant="primary"
+                    onClick={togglePlayerMode}
+                  >
+                    2-Player Mode
+                  </Button>
                 )}
-                {mode === "2-player" && (
-                  <>
-                    <Button
-                      className="m-3"
-                      variant="secondary"
-                      onClick={() => {
-                        setMode("1-player");
-                      }}
-                    >
-                      1-Player
-                    </Button>
-                    <Button
-                      className="mx-3 mb-3"
-                      variant="primary"
-                      onClick={() => {
-                        setMode("2-player");
-                      }}
-                    >
-                      2-Player
-                    </Button>
-                  </>
+                {mode !== "1-player" && (
+                  <Button
+                    className="m-3"
+                    variant="secondary"
+                    onClick={togglePlayerMode}
+                  >
+                    1-Player Mode
+                  </Button>
                 )}
               </Card>
             </Col>
@@ -162,7 +148,7 @@ export default function App() {
             {mode === "2-player" && (
               <Col md={4} lg={3} className="d-none d-md-block">
                 <Tetris
-                  username="..."
+                  username="<waiting>"
                   twoPlayerMode={mode === "2-player"}
                   primaryPlayer={false}
                   focus={false}
