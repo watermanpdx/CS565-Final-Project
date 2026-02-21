@@ -8,8 +8,7 @@ const port = process.env.PORT || 3001;
 const sql = require("better-sqlite3");
 const db = new sql("database.db");
 
-const Tetris = require("./tetris.js");
-const game = new Tetris();
+const Rooms = require("./rooms.js");
 
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -34,59 +33,170 @@ db.prepare(
     score INTEGER NOT NULL,
     durationMs INTEGER,
     date DATETIME,
-    FOREIGN KEY (username) REFERENCES users(username)
+    UNIQUE(username, score, durationMs, date)
   )  
 `,
 ).run();
 
+const rooms = new Rooms();
+
 // Socket.IO communication
 io.on("connection", (socket) => {
+  let room = null;
+  let primaryGame = null;
+  let secondaryGame = null;
+  let username = null;
+
   console.log(`Connected to socket.id: ${socket.id}`);
-  if (!game.isRunning()) {
-    game.init();
-    game.run();
+
+  socket.on("game-connect", (data) => {
+    username = data.username;
+    const primaryPlayer = data.primaryPlayer;
+    const twoPlayerMode = data.twoPlayerMode;
+
+    console.log(
+      `Connecting ${twoPlayerMode ? "2-player" : "1-player"} game for: ${username}`,
+    );
+
+    room = rooms.joinRoom(username, twoPlayerMode);
+    room.attachOnRunning(onRunning);
+
+    if (primaryPlayer) {
+      room.attachOnPlayer(onPlayer);
+      onPlayer(room);
+
+      primaryGame = room.getPrimaryGame(username);
+      primaryGame.attachOnUpdate(onUpdate);
+      primaryGame.attachOnEnd(onEnd);
+
+      socket.emit("render-primary", primaryGame.currentState);
+    } else {
+      secondaryGame = room.getSecondaryGame(username);
+      secondaryGame.attachOnUpdate(onUpdate);
+      secondaryGame.attachOnEnd(onEnd);
+
+      socket.emit("render-secondary", secondaryGame.currentState);
+    }
+  });
+
+  socket.on("start", () => {
+    if (room) {
+      room.start(username);
+    }
+  });
+
+  socket.on("reset", () => {
+    if (room) {
+      room.stop();
+
+      if (primaryGame) {
+        socket.emit("render-primary", primaryGame.currentState);
+      }
+      if (secondaryGame) {
+        socket.emit("render-secondary", secondaryGame.currentState);
+      }
+      /*
+      socket.emit(
+        "running-status",
+        room.isRunning() ? "running" : "not-started",
+      );
+      */
+    }
+  });
+
+  socket.on("moveLeft", () => {
+    if (primaryGame) {
+      primaryGame.moveLeft();
+    }
+  });
+
+  socket.on("moveRight", () => {
+    if (primaryGame) {
+      primaryGame.moveRight();
+    }
+  });
+
+  socket.on("moveDown", () => {
+    if (primaryGame) {
+      primaryGame.moveDown();
+    }
+  });
+
+  socket.on("rotateLeft", () => {
+    if (primaryGame) {
+      primaryGame.rotateLeft();
+    }
+  });
+
+  socket.on("rotateRight", () => {
+    if (primaryGame) {
+      primaryGame.rotateRight();
+    }
+  });
+
+  socket.on("disconnect", () => {
+    if (primaryGame) {
+      primaryGame.removeOnUpdate(onUpdate);
+      primaryGame.removeOnEnd(onEnd);
+    }
+    if (secondaryGame) {
+      secondaryGame.removeOnUpdate(onUpdate);
+      secondaryGame.removeOnEnd(onEnd);
+    }
+
+    if (room) {
+      room.removeOnPlayer(onPlayer);
+      room.removeOnRunning(onRunning);
+    }
+  });
+
+  function onPlayer() {
+    if (room) {
+      socket.emit("player-update", {
+        primary: room.getPrimaryGame(username)
+          ? room.getPrimaryGame(username).player
+          : null,
+        secondary: room.getSecondaryGame(username)
+          ? room.getSecondaryGame(username).player
+          : null,
+      });
+    }
   }
 
-  socket.on("moveLeft", (socket) => {
-    game.moveLeft();
-  });
-
-  socket.on("moveRight", (socket) => {
-    game.moveRight();
-  });
-
-  socket.on("moveDown", (socket) => {
-    game.moveDown();
-  });
-
-  socket.on("rotateLeft", (socket) => {
-    game.rotateLeft();
-  });
-
-  socket.on("rotateRight", (socket) => {
-    game.rotateRight();
-  });
-
-  //socket.emit("render", game.init());
-});
-
-game.onUpdate((state) => {
-  io.emit("render", state);
-});
-
-game.onEnd((state, durationMs) => {
-  addScore(game.getPlayer(), state.score, durationMs);
-});
-
-io.on("disconnect", (socket) => {});
-
-function addScore(username, score, durationMs) {
-  if (username && score > 0) {
-    db.prepare(
-      "INSERT INTO scores (username, score, durationMs, date) VALUES (?, ?, ?, ?)",
-    ).run(username, score, durationMs, new Date().toISOString());
+  function onRunning() {
+    if (room) {
+      socket.emit(
+        "running-status",
+        room.isRunning() ? "running" : "not-started",
+      );
+    }
   }
-}
+
+  function onUpdate(game) {
+    if (primaryGame) {
+      socket.emit("render-primary", primaryGame.currentState);
+    }
+    if (secondaryGame) {
+      socket.emit("render-secondary", secondaryGame.currentState);
+    }
+  }
+
+  function onEnd(game) {
+    // save score
+    if (game.player && game.score > 0) {
+      db.prepare(
+        "INSERT INTO scores (username, score, durationMs, date) VALUES (?, ?, ?, ?)",
+      ).run(game.player, game.score, game.durationMs, new Date().toISOString());
+    }
+
+    // clean up rooms and handles
+    rooms.cleanup();
+    game.removeOnEnd(onEnd);
+
+    // inform frontend of state
+    socket.emit("running-status", game.isRunning() ? "running" : "not-started");
+  }
+});
 
 // REST and routing
 app.use(cors({ origin: "http://localhost:3000" }));
@@ -121,7 +231,6 @@ app.post("/login", (req, res) => {
     if (password === record.password) {
       //Successful login
       res.json({ success: true, username: username });
-      game.setPlayer(username);
 
       return;
     } else {

@@ -1,5 +1,7 @@
 // tetris.js
 
+const CallbackList = require("./utilities.js");
+
 // Global constants -----------------------------------------------------------
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 20;
@@ -340,11 +342,40 @@ class TBlock extends Block {
 // Core game class ------------------------------------------------------------
 const BLOCKS = [SquareBlock, LineBlock, SBlock, ZBlock, LBlock, JBlock, TBlock];
 class Tetris {
-  constructor() {
-    this.onStartHandle = null;
-    this.onUpdateHandle = null;
-    this.onEndHandle = null;
-    this.player = null;
+  constructor(player = null) {
+    this.player = player;
+
+    this.onStartHandles = new CallbackList(this);
+    this.onUpdateHandles = new CallbackList(this);
+    this.onEndHandles = new CallbackList(this);
+
+    this.block = null;
+    this.nextBlock = null;
+
+    this.speed = START_SPEED;
+    this.speedTick = 0;
+
+    this.level = 0;
+    this.score = 0;
+    this.durationMs = 0;
+    this.gameOver = false;
+
+    this.grid = Array(GRID_HEIGHT)
+      .fill(null)
+      .map(() => {
+        return Array(GRID_WIDTH).fill(0);
+      });
+
+    this.blankState = {
+      grid: this.grid,
+      score: this.score,
+      next: Array(NEXT_HEIGHT)
+        .fill(null)
+        .map(() => {
+          return Array(NEXT_WIDTH).fill(0);
+        }),
+      gameOver: this.gameOver,
+    };
 
     this.init();
   }
@@ -368,6 +399,7 @@ class Tetris {
 
     this.level = 0;
     this.score = 0;
+    this.durationMs = 0;
     this.gameOver = false;
 
     this.currentState = {
@@ -376,15 +408,10 @@ class Tetris {
       next: this.nextBlock.miniGrid,
       gameOver: this.gameOver,
     };
+
+    this.onUpdateHandles.call();
+
     return this.currentState;
-  }
-
-  setPlayer(player) {
-    this.player = player;
-  }
-
-  getPlayer(player) {
-    return this.player;
   }
 
   getRandomBlock() {
@@ -393,23 +420,33 @@ class Tetris {
   }
 
   moveLeft() {
-    this.block.moveLeft();
+    if (this.isRunning) {
+      this.block.moveLeft();
+    }
   }
 
   moveRight() {
-    this.block.moveRight();
+    if (this.isRunning) {
+      this.block.moveRight();
+    }
   }
 
   moveDown() {
-    this.block.moveDown();
+    if (this.isRunning) {
+      this.block.moveDown();
+    }
   }
 
   rotateLeft() {
-    this.block.rotateLeft();
+    if (this.isRunning) {
+      this.block.rotateLeft();
+    }
   }
 
   rotateRight() {
-    this.block.rotateRight();
+    if (this.isRunning) {
+      this.block.rotateRight();
+    }
   }
 
   update() {
@@ -453,6 +490,9 @@ class Tetris {
       score: this.score,
       gameOver: this.gameOver,
     };
+
+    this.onUpdateHandles.call();
+
     return this.currentState;
   }
 
@@ -488,17 +528,12 @@ class Tetris {
   }
 
   run() {
-    if (this.onStartHandle) {
-      this.onStartHandle();
-    }
+    this.onStartHandles.call();
     this.startTime = Date.now();
 
     this.running = true;
     this.interval = setInterval(() => {
       const state = this.update();
-      if (this.onUpdateHandle) {
-        this.onUpdateHandle(state);
-      }
 
       if (state.gameOver) {
         this.stop();
@@ -510,22 +545,34 @@ class Tetris {
     if (this.running) {
       clearInterval(this.interval);
       this.running = false;
-      if (this.onEndHandle) {
-        this.onEndHandle(this.currentState, Date.now() - this.startTime);
-      }
+      this.durationMs = Date.now() - this.startTime;
+
+      this.onEndHandles.call();
     }
   }
 
-  onStart(handle) {
-    this.onStartHandle = handle;
+  attachOnStart(handle) {
+    this.onStartHandles.attach(handle);
   }
 
-  onUpdate(handle) {
-    this.onUpdateHandle = handle;
+  removeOnStart(handle) {
+    this.onStartHandles.remove(handles);
   }
 
-  onEnd(handle) {
-    this.onEndHandle = handle;
+  attachOnUpdate(handle) {
+    this.onUpdateHandles.attach(handle);
+  }
+
+  removeOnUpdate(handle) {
+    this.onUpdateHandles.remove(handle);
+  }
+
+  attachOnEnd(handle) {
+    this.onEndHandles.attach(handle);
+  }
+
+  removeOnEnd(handle) {
+    this.onEndHandles.remove(handle);
   }
 }
 

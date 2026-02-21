@@ -5,8 +5,14 @@ import { useState, useEffect } from "react";
 import { socket } from "./socket";
 
 import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
 
-export default function Tetris({ playerInfo, focus }) {
+export default function Tetris({
+  username,
+  primaryPlayer = true,
+  twoPlayerMode = false,
+  focus,
+}) {
   const GRID_WIDTH = 10;
   const GRID_HEIGHT = 20;
   const [grid, setGrid] = useState(
@@ -29,6 +35,8 @@ export default function Tetris({ playerInfo, focus }) {
 
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [running, setRunning] = useState("not-started");
+  const [displayName, setDisplayName] = useState(null);
 
   const BLOCK_TYPES = [
     "block-none",
@@ -43,8 +51,26 @@ export default function Tetris({ playerInfo, focus }) {
 
   // handle socket.io communication
   useEffect(() => {
+    if (username) {
+      socket.emit("game-connect", {
+        username: username,
+        primaryPlayer: primaryPlayer,
+        twoPlayerMode: twoPlayerMode,
+      });
+    }
+
     function onConnect() {
       console.log(`Connected to socket.id: ${socket.id}`);
+    }
+
+    function onPlayer(data) {
+      const { primary, secondary } = data;
+      console.log(primary, secondary);
+      if (primaryPlayer) {
+        setDisplayName(primary);
+      } else {
+        setDisplayName(secondary);
+      }
     }
 
     function renderGrid(data) {
@@ -54,14 +80,27 @@ export default function Tetris({ playerInfo, focus }) {
       setGameOver(data.gameOver);
     }
 
+    function onRunning(value) {
+      setRunning(value);
+    }
+
     socket.on("connect", onConnect);
-    socket.on("render", renderGrid);
+    socket.on("player-update", onPlayer);
+    socket.on("running-status", onRunning);
+    if (primaryPlayer) {
+      socket.on("render-primary", renderGrid);
+    } else {
+      socket.on("render-secondary", renderGrid);
+    }
 
     return () => {
       socket.off("connect", onConnect);
-      socket.off("render", renderGrid);
+      socket.off("player-update", onPlayer);
+      socket.off("running-status", onRunning);
+      socket.off("render-primary", renderGrid);
+      socket.off("render-secondary", renderGrid);
     };
-  }, []);
+  }, [username, primaryPlayer, twoPlayerMode]);
 
   // handle user input
   useEffect(() => {
@@ -98,18 +137,24 @@ export default function Tetris({ playerInfo, focus }) {
     };
 
     // check focus first; else event-handlers override inputs elsewhere
-    if (focus) {
+    if (focus && primaryPlayer) {
       window.addEventListener("keydown", handleEvent);
       return () => {
         window.removeEventListener("keydown", handleEvent);
       };
     }
-  }, [focus]);
+  }, [primaryPlayer, focus]);
+
+  const handleStart = () => {
+    socket.emit("start");
+  };
 
   return (
     <>
       <Card className="game-window">
-        <p className="player-info">{playerInfo}</p>
+        <p className="player-info">
+          Player-{primaryPlayer ? "1" : "2"}: {displayName}
+        </p>
         <Card.Body className="game-body">
           <BlockZone
             className="play-window"
@@ -123,6 +168,20 @@ export default function Tetris({ playerInfo, focus }) {
           </div>
         </Card.Body>
       </Card>
+      {primaryPlayer && !(twoPlayerMode && running === "running") && (
+        <Card className="game-controls mt-3">
+          {running === "not-started" && (
+            <Button variant="primary" onClick={handleStart}>
+              Start
+            </Button>
+          )}
+          {running === "running" && (
+            <Button variant="secondary" onClick={handleStart}>
+              Restart
+            </Button>
+          )}
+        </Card>
+      )}
     </>
   );
 }
