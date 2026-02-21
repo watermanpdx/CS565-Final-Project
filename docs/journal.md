@@ -84,7 +84,7 @@ One open issue, is that although my database is now implemented, I have basic lo
 ## Two-Player Support
 
 Branch: [`feature/2-player-mode`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/2-player-mode)
-Commit: []()
+Commit: [b5f42ee](https://github.com/watermanpdx/CS565-Final-Project/commit/b5f42ee725cedec1f10dbf90073fa03bffa9003e)
 
 In this section I expanded the game support from one-player to two-player to make it possible for players to play side-by-side from separate browsers. This update ended up being very challenging and time-consuming. Unfortunately, it also required heavy refactoring and reorganization of code.
 
