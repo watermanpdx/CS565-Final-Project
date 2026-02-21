@@ -168,7 +168,7 @@ export default function Tetris({
           </div>
         </Card.Body>
       </Card>
-      {primaryPlayer && (
+      {primaryPlayer && !(twoPlayerMode && running === "running") && (
         <Card className="game-controls mt-3">
           {running === "not-started" && (
             <Button variant="primary" onClick={handleStart}>

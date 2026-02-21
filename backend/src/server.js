@@ -8,7 +8,7 @@ const port = process.env.PORT || 3001;
 const sql = require("better-sqlite3");
 const db = new sql("database.db");
 
-const Tetris = require("./tetris.js");
+const Rooms = require("./rooms.js");
 
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -38,171 +38,6 @@ db.prepare(
 `,
 ).run();
 
-class Room {
-  constructor(twoPlayerMode, username = null) {
-    this.id = Math.floor(Math.random() * 1000000);
-    this.twoPlayerMode = twoPlayerMode;
-    this.slot1 = {
-      game: new Tetris(),
-      readyStart: false,
-    };
-    this.slot2 = {
-      game: new Tetris(),
-      readyStart: false,
-    };
-    this.onPlayerHandle = null;
-
-    if (username) {
-      this.registerPlayer(username);
-    }
-  }
-
-  isAvailable() {
-    return this.slot1.game.player === null || this.slot2.game.player === null;
-  }
-
-  registerPlayer(username) {
-    let result = false;
-    if (this.slot1.game.player === null) {
-      this.slot1.game.player = username;
-      result = true;
-    } else if (this.slot2.game.player === null) {
-      this.slot2.game.player = username;
-      result = true;
-    }
-
-    if (this.onPlayerHandle) {
-      this.onPlayerHandle(this);
-    }
-    return result;
-  }
-
-  attachOnPlayer(handle) {
-    this.onPlayerHandle = handle;
-  }
-
-  removeOnPlayer(handle) {
-    this.onPlayerHandle = null;
-  }
-
-  isActiveRoom(username, twoPlayerMode) {
-    return (
-      this.twoPlayerMode === twoPlayerMode &&
-      (this.slot1.game.player === username ||
-        this.slot2.game.player === username)
-    );
-  }
-
-  getPrimaryGame(username) {
-    if (this.slot1.game.player === username) {
-      return this.slot1.game;
-    } else if (this.slot2.game.player === username) {
-      return this.slot2.game;
-    } else {
-      return null;
-    }
-  }
-
-  getSecondaryGame(username) {
-    if (this.slot1.game.player === username) {
-      return this.slot2.game;
-    } else if (this.slot2.game.player === username) {
-      return this.slot1.game;
-    } else {
-      return null;
-    }
-  }
-
-  start(username) {
-    if (!this.twoPlayerMode) {
-      // if one-player no need to wait, just start
-      this.slot1.readyStart = true;
-      this.slot1.game.init();
-      this.slot1.game.run();
-    } else {
-      // if two-player, only start when both are ready
-      if (this.slot1.game.player === username) {
-        this.slot1.readyStart = true;
-      } else if (this.slot2.game.player === username) {
-        this.slot2.readyStart = true;
-      }
-
-      if (this.slot1.readyStart && this.slot2.readyStart) {
-        this.slot1.game.init();
-        this.slot1.game.run();
-        this.slot2.game.init();
-        this.slot2.game.run();
-      }
-    }
-  }
-
-  stop() {
-    if (!this.twoPlayerMode) {
-      this.slot1.game.stop();
-    }
-  }
-
-  isRunning() {
-    if (!this.twoPlayerMode) {
-      return this.slot1.game.isRunning();
-    } else {
-      return this.slot1.game.isRunning() && this.slot2.game.isRunning();
-    }
-  }
-}
-
-class Rooms {
-  constructor() {
-    this.rooms = [];
-  }
-
-  joinRoom(username, twoPlayerMode) {
-    // check if already in room
-    let room = this.findActiveRoom(username, twoPlayerMode);
-    // check for available room
-    if (!room) {
-      room = this.rooms.find((r) => {
-        return r.isAvailable();
-      });
-      if (room) {
-        room.registerPlayer(username);
-      }
-    }
-    // create new room
-    if (!room) {
-      room = new Room(twoPlayerMode, username);
-      this.rooms.push(room);
-    }
-
-    console.log(
-      `Room id-${room.id}, mode: ${this.twoPlayerMode ? "2-player" : "1-player"}`,
-    );
-    console.log(
-      `  Players: ${room.slot1.game.player}, ${room.slot2.game.player}`,
-    );
-
-    return room;
-  }
-
-  findActiveRoom(username, twoPlayerMode) {
-    const room = this.rooms.find((r) => {
-      return r.isActiveRoom(username, twoPlayerMode);
-    });
-    return room;
-  }
-
-  cleanup() {
-    for (const room of this.rooms) {
-      if (!room.isRunning()) {
-        const index = this.rooms.indexOf(room);
-        if (index !== -1) {
-          this.rooms.splice(index, 1);
-        }
-      }
-    }
-  }
-}
-
 const rooms = new Rooms();
 
 // Socket.IO communication
@@ -224,6 +59,7 @@ io.on("connection", (socket) => {
     );
 
     room = rooms.joinRoom(username, twoPlayerMode);
+    room.attachOnRunning(onRunning);
 
     if (primaryPlayer) {
       room.attachOnPlayer(onPlayer);
@@ -242,16 +78,18 @@ io.on("connection", (socket) => {
       socket.emit("render-secondary", secondaryGame.currentState);
     }
 
-    socket.emit("running-status", room.isRunning() ? "running" : "not-started");
+    //socket.emit("running-status", room.isRunning() ? "running" : "not-started");
   });
 
   socket.on("start", () => {
     if (room) {
       room.start(username);
+      /*
       socket.emit(
         "running-status",
         room.isRunning() ? "running" : "not-started",
       );
+      */
     }
   });
 
@@ -265,10 +103,12 @@ io.on("connection", (socket) => {
       if (secondaryGame) {
         socket.emit("render-secondary", secondaryGame.currentState);
       }
+      /*
       socket.emit(
         "running-status",
         room.isRunning() ? "running" : "not-started",
       );
+      */
     }
   });
 
@@ -311,6 +151,11 @@ io.on("connection", (socket) => {
       secondaryGame.removeOnUpdate(onUpdate);
       secondaryGame.removeOnEnd(onEnd);
     }
+
+    if (room) {
+      room.removeOnPlayer(onPlayer);
+      room.removeOnRunning(onRunning);
+    }
   });
 
   function onPlayer() {
@@ -323,6 +168,15 @@ io.on("connection", (socket) => {
           ? room.getSecondaryGame(username).player
           : null,
       });
+    }
+  }
+
+  function onRunning() {
+    if (room) {
+      socket.emit(
+        "running-status",
+        room.isRunning() ? "running" : "not-started",
+      );
     }
   }
 

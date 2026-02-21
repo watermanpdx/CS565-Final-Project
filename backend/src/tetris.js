@@ -1,5 +1,7 @@
 // tetris.js
 
+const CallbackList = require("./utilities.js");
+
 // Global constants -----------------------------------------------------------
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 20;
@@ -18,33 +20,6 @@ const BLOCK_ENUM = {
   J_BLOCK: 6,
   T_BLOCK: 7,
 };
-
-// Callbacks class ------------------------------------------------------------
-class CallbackList {
-  constructor(context) {
-    this.context = context;
-    this.callHandles = [];
-  }
-
-  attach(handle) {
-    this.callHandles.push(handle);
-  }
-
-  remove(handle) {
-    const index = this.callHandles.indexOf(handle);
-    if (index !== -1) {
-      this.callHandles.splice(index, 1);
-    }
-  }
-
-  call() {
-    for (const handle of this.callHandles) {
-      if (handle) {
-        handle(this.context);
-      }
-    }
-  }
-}
 
 // Block (base) class ---------------------------------------------------------
 class Block {
