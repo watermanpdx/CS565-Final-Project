@@ -1,16 +1,15 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-
-import { useState, useEffect } from "react";
-
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import Toast from "react-bootstrap/Toast";
 import ToastContainer from "react-bootstrap/ToastContainer";
 
-const URL = "http://localhost:3001";
+import { useState, useEffect } from "react";
 
-export default function AccountModal({
+import { BACKEND_URL } from "../config.js";
+
+export default function Login({
   show,
   setShow,
   usernameParent,
@@ -40,7 +39,7 @@ export default function AccountModal({
   };
 
   const handleLogin = async () => {
-    const post = await fetch(`${URL}/login`, {
+    const post = await fetch(`${BACKEND_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -60,7 +59,7 @@ export default function AccountModal({
 
   const handleNewAccount = async () => {
     if (password === passwordCheck) {
-      const post = await fetch(`${URL}/new-account`, {
+      const post = await fetch(`${BACKEND_URL}/new-account`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -80,7 +79,7 @@ export default function AccountModal({
 
   const handleUpdatePassword = async () => {
     if (password === passwordCheck) {
-      const post = await fetch(`${URL}/password-reset`, {
+      const post = await fetch(`${BACKEND_URL}/password-reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -102,7 +101,7 @@ export default function AccountModal({
     <>
       <Modal show={show} onHide={handleClose} data-bs-theme="dark">
         {view === "login" && (
-          <Login
+          <EnterPassword
             show={show}
             handleClose={handleClose}
             setUsername={setUsername}
@@ -154,7 +153,7 @@ export default function AccountModal({
   );
 }
 
-function Login({
+function EnterPassword({
   show,
   handleClose,
   setUsername,

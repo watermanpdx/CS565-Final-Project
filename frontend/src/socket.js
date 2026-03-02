@@ -1,5 +1,7 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://localhost:3001", {
+import { BACKEND_URL } from "./config.js";
+
+export const socket = io(BACKEND_URL, {
   transports: ["websocket"],
 });

@@ -1,0 +1,81 @@
+import "bootstrap/dist/css/bootstrap.min.css";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
+
+import Tetris from "../components/Tetris.jsx";
+import { MiniLeaderboard } from "../components/Leaderboard.jsx";
+
+import { socket } from "../socket";
+import { useState, useEffect } from "react";
+
+export default function Home({ username, gameFocus }) {
+  const [mode, setMode] = useState(
+    sessionStorage.getItem("mode") || "1-player",
+  );
+
+  useEffect(() => {
+    sessionStorage.setItem("mode", mode);
+  }, [mode]);
+
+  const togglePlayerMode = () => {
+    if (mode === "1-player") {
+      setMode("2-player");
+      socket.emit("reset");
+    } else if (mode === "2-player") {
+      setMode("1-player");
+      socket.emit("reset");
+    }
+  };
+
+  return (
+    <>
+      <Container className="main-contents-container m-3">
+        <Row>
+          <Col lg={3} className="d-none d-lg-block">
+            <MiniLeaderboard />
+            <Card className="number-players-control">
+              {mode === "1-player" && (
+                <Button
+                  className="m-3"
+                  variant="primary"
+                  onClick={togglePlayerMode}
+                >
+                  2-Player Mode
+                </Button>
+              )}
+              {mode !== "1-player" && (
+                <Button
+                  className="m-3"
+                  variant="secondary"
+                  onClick={togglePlayerMode}
+                >
+                  1-Player Mode
+                </Button>
+              )}
+            </Card>
+          </Col>
+          <Col xs={8} md={4} lg={3}>
+            <Tetris
+              username={username}
+              twoPlayerMode={mode === "2-player"}
+              focus={gameFocus}
+            />
+          </Col>
+          {mode === "2-player" && (
+            <Col md={4} lg={3} className="d-none d-md-block">
+              <Tetris
+                username={username}
+                twoPlayerMode={mode === "2-player"}
+                primaryPlayer={false}
+                focus={false}
+              />
+            </Col>
+          )}
+        </Row>
+      </Container>
+    </>
+  );
+}

@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./Tetris.css";
 
 import { useState, useEffect } from "react";
-import { socket } from "./socket";
+import { socket } from "../socket";
 
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
