@@ -2,7 +2,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 
 import Tetris from "../components/Tetris.jsx";
@@ -36,26 +35,24 @@ export default function Home({ username, gameFocus }) {
         <Row>
           <Col lg={3} className="d-none d-lg-block">
             <MiniLeaderboard />
-            <Card className="number-players-control">
-              {mode === "1-player" && (
-                <Button
-                  className="m-3"
-                  variant="primary"
-                  onClick={togglePlayerMode}
-                >
-                  2-Player Mode
-                </Button>
-              )}
-              {mode !== "1-player" && (
-                <Button
-                  className="m-3"
-                  variant="secondary"
-                  onClick={togglePlayerMode}
-                >
-                  1-Player Mode
-                </Button>
-              )}
-            </Card>
+            {mode === "1-player" && (
+              <Button
+                className="m-3"
+                variant="primary"
+                onClick={togglePlayerMode}
+              >
+                2-Player Mode
+              </Button>
+            )}
+            {mode !== "1-player" && (
+              <Button
+                className="m-3"
+                variant="secondary"
+                onClick={togglePlayerMode}
+              >
+                1-Player Mode
+              </Button>
+            )}
           </Col>
           <Col xs={8} md={4} lg={3}>
             <Tetris

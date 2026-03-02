@@ -51,7 +51,7 @@ export default function NavigationBar({
                   setView("leaderboard");
                 }}
               >
-                Leaderboard
+                High-Scores
               </Nav.Link>
               <Nav.Link
                 onClick={() => {

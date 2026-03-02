@@ -33,7 +33,7 @@ db.prepare(
     score INTEGER NOT NULL,
     durationMs INTEGER,
     date DATETIME,
-    UNIQUE(username, score, durationMs, date)
+    UNIQUE(username, score, durationMs)
   )  
 `,
 ).run();

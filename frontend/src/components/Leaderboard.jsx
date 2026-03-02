@@ -25,7 +25,7 @@ export default function Leaderboard() {
   return (
     <>
       <Container className="leaderboard-container">
-        <h3>Leaderboard</h3>
+        <h3>High-Scores</h3>
         {scores.map((score) => (
           <Card key={score.id} className="leaderboard-card mb-2">
             <Card.Body className="d-flex align-items-center justify-content-start">
@@ -60,8 +60,10 @@ export function MiniLeaderboard() {
 
   return (
     <>
-      <Container className="leaderboard-container">
-        <h3>Leaderboard</h3>
+      <Container className="leaderboard-container" data-bs-theme="dark">
+        <Card className="d-flex align-items-center justify-content-center mb-2 p-1">
+          <h4>Leaderboard</h4>
+        </Card>
         {scores.map((score) => (
           <Card key={score.id} className="leaderboard-card mb-2">
             <Card.Body className="d-flex align-items-center justify-content-start">
