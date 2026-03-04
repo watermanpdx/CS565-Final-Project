@@ -366,16 +366,11 @@ class Tetris {
         return Array(GRID_WIDTH).fill(0);
       });
 
-    this.blankState = {
-      grid: this.grid,
-      score: this.score,
-      next: Array(NEXT_HEIGHT)
-        .fill(null)
-        .map(() => {
-          return Array(NEXT_WIDTH).fill(0);
-        }),
-      gameOver: this.gameOver,
-    };
+    this.blankState = Array(NEXT_HEIGHT)
+      .fill(null)
+      .map(() => {
+        return Array(NEXT_WIDTH).fill(0);
+      });
 
     this.init();
   }
@@ -405,7 +400,7 @@ class Tetris {
     this.currentState = {
       grid: this.grid,
       score: this.score,
-      next: this.nextBlock.miniGrid,
+      next: this.blankState,
       gameOver: this.gameOver,
     };
 

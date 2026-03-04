@@ -100,6 +100,12 @@ Last, while testing I identified that (due to multiple callbacks) duplicate scor
 
 In the next set of updates I intend on polishing the frontend styling. The core functionalities are now more-or-less in place, but elements like the leaderboard and modals could be heavily improved.
 
+https://stackoverflow.com/questions/65253543/how-to-align-nav-items-to-the-right-in-bootstrap-5
+
+https://mariadb.com/docs/server/reference/sql-statements/data-manipulation/inserting-loading-data/insert-ignore
+
 # References
 
 https://www.geeksforgeeks.org/web-tech/express-js-req-query-property/
+
+https://www.w3schools.com/tags/tag_span.asp

@@ -1,11 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
+
 import "./Tetris.css";
 
 import { useState, useEffect } from "react";
 import { socket } from "../socket";
-
-import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
 
 export default function Tetris({
   username,
@@ -152,8 +152,9 @@ export default function Tetris({
   return (
     <>
       <Card className="game-window">
-        <p className="player-info">
-          Player-{primaryPlayer ? "1" : "2"}: {displayName}
+        <p className="player-info d-flex justify-content-between pe-3">
+          <span>Player-{primaryPlayer ? "1" : "2"}</span>
+          <span>{displayName}</span>
         </p>
         <Card.Body className="game-body">
           <BlockZone
@@ -169,7 +170,7 @@ export default function Tetris({
         </Card.Body>
       </Card>
       {primaryPlayer && !(twoPlayerMode && running === "running") && (
-        <Card className="game-controls mt-3">
+        <Card className="game-controls mt-3 border-0">
           {running === "not-started" && (
             <Button variant="primary" onClick={handleStart}>
               Start

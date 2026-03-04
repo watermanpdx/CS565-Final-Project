@@ -37,7 +37,7 @@ export default function Home({ username, gameFocus }) {
             <MiniLeaderboard />
             {mode === "1-player" && (
               <Button
-                className="m-3"
+                className="w-100 mt-3"
                 variant="primary"
                 onClick={togglePlayerMode}
               >
@@ -46,7 +46,7 @@ export default function Home({ username, gameFocus }) {
             )}
             {mode !== "1-player" && (
               <Button
-                className="m-3"
+                className="w-100 mt-3"
                 variant="secondary"
                 onClick={togglePlayerMode}
               >

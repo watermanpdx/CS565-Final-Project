@@ -8,6 +8,8 @@ import HowToPlay from "../components/HowToPlay.jsx";
 import About from "../components/About.jsx";
 import Login from "../components/Login.jsx";
 
+import logo from "../assets/logo.png";
+
 import { useState, useEffect } from "react";
 
 export default function NavigationBar({
@@ -28,7 +30,10 @@ export default function NavigationBar({
     <>
       <Navbar expand="md" className="bg-body-tertiary" data-bs-theme="dark">
         <Container>
-          <Navbar.Brand href="#home">Multi-Player Tetris</Navbar.Brand>
+          <Navbar.Brand href="#home">
+            <img src={logo} height="30" width="30" alt="tetris logo" />{" "}
+            Multi-Player Tetris
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
@@ -60,10 +65,12 @@ export default function NavigationBar({
               >
                 About
               </Nav.Link>
-
+            </Nav>
+            <Nav className="ms-auto">
               <NavDropdown
                 title={username ? username : "username"}
                 id="basic-nav-dropdown"
+                align="end"
               >
                 <NavDropdown.Item
                   onClick={() => {

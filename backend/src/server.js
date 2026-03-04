@@ -185,7 +185,7 @@ io.on("connection", (socket) => {
     // save score
     if (game.player && game.score > 0) {
       db.prepare(
-        "INSERT INTO scores (username, score, durationMs, date) VALUES (?, ?, ?, ?)",
+        "INSERT OR IGNORE INTO scores (username, score, durationMs, date) VALUES (?, ?, ?, ?)",
       ).run(game.player, game.score, game.durationMs, new Date().toISOString());
     }
 
