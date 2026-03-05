@@ -103,7 +103,7 @@ In the next set of updates I intend on polishing the frontend styling. The core 
 ## Organization and Polishing
 
 Branch: [`feature/code-structure-and-visuals`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/code-structure-and-visuals)
-Commit: []()
+Commit: [688f42c](https://github.com/watermanpdx/CS565-Final-Project/commit/688f42c16bc0da2167eed4bca61396111d2ca262)
 
 In this update I chose to organize the codebase and "polish" the webpage visuals. I first focused on the `React` code. Although the frontend code was working, a lot of it was combined together in `App.jsx`. This made the code both hard to read, and also seemed to not fit with the general "component" paradigm of `React`. I decided to split each page and modal into their own respective files, and strip down `App.jsx` to a minimal set of components and shared states. This made the code both easier to read, and by extension a bit easier to read. Following this migration, I chose to work on the formatting of some of the key elements (see further). Having content dedicated into specific files scoped around major "features" of the webpage made it much easier to manage where content needed to be updated, and where to focus attention.
 
