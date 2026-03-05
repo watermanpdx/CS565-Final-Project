@@ -1,3 +1,5 @@
+// Tetris.jsx
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
@@ -8,11 +10,17 @@ import { useState, useEffect } from "react";
 import { socket } from "../socket";
 
 export default function Tetris({
-  username,
+  username = null,
   primaryPlayer = true,
   twoPlayerMode = false,
-  focus,
+  focus = null,
+  setNewScoreFlag = null,
 }) {
+  const [score, setScore] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
+  const [running, setRunning] = useState("not-started");
+  const [displayName, setDisplayName] = useState(null);
+
   const GRID_WIDTH = 10;
   const GRID_HEIGHT = 20;
   const [grid, setGrid] = useState(
@@ -33,11 +41,6 @@ export default function Tetris({
       }),
   );
 
-  const [score, setScore] = useState(0);
-  const [gameOver, setGameOver] = useState(false);
-  const [running, setRunning] = useState("not-started");
-  const [displayName, setDisplayName] = useState(null);
-
   const BLOCK_TYPES = [
     "block-none",
     "square-block",
@@ -48,6 +51,14 @@ export default function Tetris({
     "j-block",
     "t-block",
   ];
+
+  useEffect(() => {
+    if (gameOver && setNewScoreFlag) {
+      setNewScoreFlag(true);
+    } else {
+      setNewScoreFlag(false);
+    }
+  }, [gameOver, setNewScoreFlag]);
 
   // handle socket.io communication
   useEffect(() => {

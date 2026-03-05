@@ -1,3 +1,5 @@
+// server.js
+
 const cors = require("cors");
 const express = require("express");
 const app = express();
@@ -8,14 +10,14 @@ const port = process.env.PORT || 3001;
 const sql = require("better-sqlite3");
 const db = new sql("database.db");
 
-const Rooms = require("./rooms.js");
-
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+const Rooms = require("./rooms.js");
+const rooms = new Rooms();
 const MAX_SCORE_ENTRIES = 10000;
 
-// Database (setup)
+// Database (setup) -----------------------------------------------------------
 db.prepare(
   `
   CREATE TABLE IF NOT EXISTS users (
@@ -38,9 +40,7 @@ db.prepare(
 `,
 ).run();
 
-const rooms = new Rooms();
-
-// Socket.IO communication
+// Socket.IO communication ----------------------------------------------------
 io.on("connection", (socket) => {
   let room = null;
   let primaryGame = null;
@@ -198,7 +198,7 @@ io.on("connection", (socket) => {
   }
 });
 
-// REST and routing
+// REST and routing -----------------------------------------------------------
 app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
 

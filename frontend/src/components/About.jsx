@@ -1,6 +1,14 @@
+// About.jsx
+
+/*
+"About" modal - What is the site about, including links to source repo
+*/
+
+// Dependencies
 import "bootstrap/dist/css/bootstrap.min.css";
 import Modal from "react-bootstrap/Modal";
 
+// About component
 export default function About({ show, setShow }) {
   const handleClose = () => setShow(false);
   return (

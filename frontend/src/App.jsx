@@ -1,3 +1,5 @@
+// App.jsx
+
 import "./App.css";
 import Home from "./components/Home.jsx";
 import Leaderboard from "./components/Leaderboard.jsx";

@@ -100,12 +100,17 @@ Last, while testing I identified that (due to multiple callbacks) duplicate scor
 
 In the next set of updates I intend on polishing the frontend styling. The core functionalities are now more-or-less in place, but elements like the leaderboard and modals could be heavily improved.
 
-https://stackoverflow.com/questions/65253543/how-to-align-nav-items-to-the-right-in-bootstrap-5
+## Organization and Polishing
 
-https://mariadb.com/docs/server/reference/sql-statements/data-manipulation/inserting-loading-data/insert-ignore
+Branch: [`feature/code-structure-and-visuals`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/code-structure-and-visuals)
+Commit: []()
+
+In this update I chose to organize the codebase and "polish" the webpage visuals. I first focused on the `React` code. Although the frontend code was working, a lot of it was combined together in `App.jsx`. This made the code both hard to read, and also seemed to not fit with the general "component" paradigm of `React`. I decided to split each page and modal into their own respective files, and strip down `App.jsx` to a minimal set of components and shared states. This made the code both easier to read, and by extension a bit easier to read. Following this migration, I chose to work on the formatting of some of the key elements (see further). Having content dedicated into specific files scoped around major "features" of the webpage made it much easier to manage where content needed to be updated, and where to focus attention.
+
+Following the file restructuring, I also updated the formatting of the webpage itself. I updated the "High Score" page and "mini" board to format the values in a more visually appealing way (spacing, rank, date formatting, "column" titles, etc.). I chose to give the site a very dark theme; all the high-score information in Bootstrap "dark" mode, and the background as black. Normally, I wouldn't have chosen such an aggressively dark theme, but considering that the game subject, Tetris, is "retro" game, I liked the dark theme as it was reminiscent of old arcade environments and machines.
+
+During the formatting, I ran into a couple of issues. The first issue I encountered was in formatting the text-layout of the score entries in high-score fields. As I wanted to show multiple scores in each of the structures, I wanted to format the different score values to be aligned vertically, and spaced out horizontally from one another. I found that the use of the [`<span>`](https://www.w3schools.com/tags/tag_span.asp) tag very useful for this. Using `span` allowed me to control individual text fields and also apply fixed text length to individual fields ensuring consistent alignment (width styling). I also encountered a minor issue, where I wanted to shift the account link to the right-side of the Navbar. It turned out to be rather straight-forward using the Bootstrap `ms-auto` and `me-auto` classnames in the Nav groups ([bootstrap nav alignment](https://stackoverflow.com/questions/65253543/how-to-align-nav-items-to-the-right-in-bootstrap-5)).
+
+In this update, I also addressed some minor and major bugs. The biggest bug I encountered was with insertion to the score database. In earlier updates, I had encountered issues with duplicate entries (caused by multiple writes) to the database. I attempted to fix this with the `UNIQUE` constraint on the table. This worked, in that it prevented duplicate entries, but did so via throwing an error, causing the site to crash. I found that the duplicate entries could be prevented without throwing errors via the [`INSERT OR IGNORE INTO`](https://mariadb.com/docs/server/reference/sql-statements/data-manipulation/inserting-loading-data/insert-ignore). I chose to use this rather than a try/catch block as I wanted duplicate writes to be supressed "silently", and also didn't need or want the frontend to be informed.
 
 # References
-
-https://www.geeksforgeeks.org/web-tech/express-js-req-query-property/
-
-https://www.w3schools.com/tags/tag_span.asp

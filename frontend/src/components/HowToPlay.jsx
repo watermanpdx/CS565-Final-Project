@@ -1,3 +1,5 @@
+// HowToPlay.jsx
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import Modal from "react-bootstrap/Modal";
 

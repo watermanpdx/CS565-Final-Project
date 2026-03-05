@@ -14,6 +14,11 @@ export default function Home({ username, gameFocus }) {
   const [mode, setMode] = useState(
     sessionStorage.getItem("mode") || "1-player",
   );
+  const [newScoreFlag, setNewScoreFlag] = useState(false);
+
+  useEffect(() => {
+    console.log(newScoreFlag);
+  }, [newScoreFlag]);
 
   useEffect(() => {
     sessionStorage.setItem("mode", mode);
@@ -34,7 +39,7 @@ export default function Home({ username, gameFocus }) {
       <Container className="main-contents-container m-3">
         <Row>
           <Col lg={3} className="d-none d-lg-block">
-            <MiniLeaderboard />
+            <MiniLeaderboard newScoreFlag={newScoreFlag} />
             {mode === "1-player" && (
               <Button
                 className="w-100 mt-3"
@@ -59,6 +64,7 @@ export default function Home({ username, gameFocus }) {
               username={username}
               twoPlayerMode={mode === "2-player"}
               focus={gameFocus}
+              setNewScoreFlag={setNewScoreFlag}
             />
           </Col>
           {mode === "2-player" && (

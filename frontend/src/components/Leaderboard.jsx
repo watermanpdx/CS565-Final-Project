@@ -1,8 +1,12 @@
+// Leaderboard.jsx
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import Container from "react-bootstrap/Container";
 import Card from "react-bootstrap/Card";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+
+import "./Leaderboard.css";
 
 import { useState, useEffect } from "react";
 
@@ -34,20 +38,20 @@ export default function Leaderboard() {
             </Card>
             <Card className="leaderboard-card mt-2 mb-3 border-0">
               <div className="d-flex align-items-end justify-content-start px-4 py-1">
-                <span style={{ width: "100px" }}>Rank</span>
-                <span style={{ width: "100px" }}>Player</span>
-                <span style={{ width: "100px" }}>Score</span>
-                <span style={{ width: "100px" }}>Duration</span>
+                <span className="leaderboard-entry">Rank</span>
+                <span className="leaderboard-entry">Player</span>
+                <span className="leaderboard-entry">Score</span>
+                <span className="leaderboard-entry">Duration</span>
                 <span>Date</span>
               </div>
             </Card>
             {scores.map((score, i) => (
               <Card key={score.id} className="leaderboard-card mt-2 border-0">
                 <div className="d-flex align-items-end justify-content-start px-4 py-1">
-                  <span style={{ width: "100px" }}>{i + 1}</span>
-                  <span style={{ width: "100px" }}>{score.username}</span>
-                  <span style={{ width: "100px" }}>{score.score}</span>
-                  <span style={{ width: "100px" }}>
+                  <span className="leaderboard-entry">{i + 1}</span>
+                  <span className="leaderboard-entry">{score.username}</span>
+                  <span className="leaderboard-entry">{score.score}</span>
+                  <span className="leaderboard-entry">
                     {(score.durationMs / 1000).toFixed(1)} sec
                   </span>
                   <span>
@@ -69,7 +73,7 @@ export default function Leaderboard() {
   );
 }
 
-export function MiniLeaderboard() {
+export function MiniLeaderboard({ newScoreFlag }) {
   const [scores, setScores] = useState([]);
 
   useEffect(() => {
@@ -83,7 +87,7 @@ export function MiniLeaderboard() {
     }
 
     getScores();
-  }, []);
+  }, [newScoreFlag]);
 
   return (
     <>
@@ -93,17 +97,17 @@ export function MiniLeaderboard() {
         </Card>
         <Card className="leaderboard-card mt-2 mb-3 border-0">
           <div className="d-flex align-items-center justify-content-start px-4 py-1">
-            <span style={{ width: "75px" }}>Rank</span>
-            <span style={{ width: "125px" }}>Player</span>
-            <span style={{ width: "125px" }}>Score</span>
+            <span className="mini-leaderboard-rank">Rank</span>
+            <span className="mini-leaderboard-entry">Player</span>
+            <span className="mini-leaderboard-entry">Score</span>
           </div>
         </Card>
         {scores.map((score, i) => (
           <Card key={score.id} className="leaderboard-card mt-2 border-0">
             <div className="d-flex align-items-center justify-content-start px-4 py-1">
-              <span style={{ width: "75px" }}>{i + 1}</span>
-              <span style={{ width: "125px" }}>{score.username}</span>
-              <span style={{ width: "125px" }}>{score.score}</span>
+              <span className="mini-leaderboard-rank">{i + 1}</span>
+              <span className="mini-leaderboard-entry">{score.username}</span>
+              <span className="mini-leaderboard-entry">{score.score}</span>
             </div>
           </Card>
         ))}
