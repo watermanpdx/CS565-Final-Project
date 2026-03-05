@@ -2,6 +2,9 @@
 
 // Callbacks class ------------------------------------------------------------
 class CallbackList {
+  /*
+    Datastructure for managing a list of callbacks
+  */
   constructor(context) {
     this.context = context;
     this.callHandles = [];

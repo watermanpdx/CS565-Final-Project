@@ -1,0 +1,13 @@
+/* Leaderboard.css */
+
+.leaderboard-entry {
+  width: 100px;
+}
+
+.mini-leaderboard-rank {
+  width: 75px;
+}
+
+.mini-leaderboard-entry {
+  width: 125px;
+}

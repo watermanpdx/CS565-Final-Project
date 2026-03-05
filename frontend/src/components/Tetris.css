@@ -1,3 +1,7 @@
+/* Tetris.css */
+
+/* Custom, local .css stylings for Tetris game rendering */
+
 .game-window {
   background-color: rgb(117, 116, 116);
 }

@@ -23,6 +23,9 @@ const BLOCK_ENUM = {
 
 // Block (base) class ---------------------------------------------------------
 class Block {
+  /*
+    Base "Block" class for Tetronimo game-pieces
+  */
   constructor(
     environment,
     blockType,
@@ -156,6 +159,9 @@ class Block {
 
 // Derived, (specific) block classes ------------------------------------------
 class SquareBlock extends Block {
+  /*
+    Derived "Square" block Tetronimo
+  */
   constructor(environment) {
     const shapes = [
       [
@@ -168,6 +174,9 @@ class SquareBlock extends Block {
 }
 
 class LineBlock extends Block {
+  /*
+    Derived "Line-Block" block Tetronimo
+  */
   constructor(environment) {
     const shapes = [
       [
@@ -200,6 +209,9 @@ class LineBlock extends Block {
 }
 
 class SBlock extends Block {
+  /*
+    Derived "S-Block" block Tetronimo
+  */
   constructor(environment) {
     const shapes = [
       [
@@ -228,6 +240,9 @@ class SBlock extends Block {
 }
 
 class ZBlock extends Block {
+  /*
+    Derived "Z-Block" block Tetronimo
+  */
   constructor(environment) {
     const shapes = [
       [
@@ -256,6 +271,9 @@ class ZBlock extends Block {
 }
 
 class LBlock extends Block {
+  /*
+    Derived "L-Block" block Tetronimo
+  */
   constructor(environment) {
     const shapes = [
       [
@@ -284,6 +302,9 @@ class LBlock extends Block {
 }
 
 class JBlock extends Block {
+  /*
+    Derived "J-Block" block Tetronimo
+  */
   constructor(environment) {
     const shapes = [
       [
@@ -312,6 +333,9 @@ class JBlock extends Block {
 }
 
 class TBlock extends Block {
+  /*
+    Derived "T-Block" block Tetronimo
+  */
   constructor(environment) {
     const shapes = [
       [
@@ -342,6 +366,9 @@ class TBlock extends Block {
 // Core game class ------------------------------------------------------------
 const BLOCKS = [SquareBlock, LineBlock, SBlock, ZBlock, LBlock, JBlock, TBlock];
 class Tetris {
+  /*
+    Main Tetris game class. Manage Tetris game and animation
+  */
   constructor(player = null) {
     this.player = player;
 
@@ -366,16 +393,11 @@ class Tetris {
         return Array(GRID_WIDTH).fill(0);
       });
 
-    this.blankState = {
-      grid: this.grid,
-      score: this.score,
-      next: Array(NEXT_HEIGHT)
-        .fill(null)
-        .map(() => {
-          return Array(NEXT_WIDTH).fill(0);
-        }),
-      gameOver: this.gameOver,
-    };
+    this.blankState = Array(NEXT_HEIGHT)
+      .fill(null)
+      .map(() => {
+        return Array(NEXT_WIDTH).fill(0);
+      });
 
     this.init();
   }
@@ -405,7 +427,7 @@ class Tetris {
     this.currentState = {
       grid: this.grid,
       score: this.score,
-      next: this.nextBlock.miniGrid,
+      next: this.blankState,
       gameOver: this.gameOver,
     };
 

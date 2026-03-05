@@ -1,18 +1,26 @@
+// Tetris.jsx
+
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Tetris.css";
-
-import { useState, useEffect } from "react";
-import { socket } from "./socket";
-
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 
+import "./Tetris.css";
+
+import { useState, useEffect } from "react";
+import { socket } from "../socket";
+
 export default function Tetris({
-  username,
+  username = null,
   primaryPlayer = true,
   twoPlayerMode = false,
-  focus,
+  focus = null,
+  setNewScoreFlag = null,
 }) {
+  const [score, setScore] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
+  const [running, setRunning] = useState("not-started");
+  const [displayName, setDisplayName] = useState(null);
+
   const GRID_WIDTH = 10;
   const GRID_HEIGHT = 20;
   const [grid, setGrid] = useState(
@@ -33,11 +41,6 @@ export default function Tetris({
       }),
   );
 
-  const [score, setScore] = useState(0);
-  const [gameOver, setGameOver] = useState(false);
-  const [running, setRunning] = useState("not-started");
-  const [displayName, setDisplayName] = useState(null);
-
   const BLOCK_TYPES = [
     "block-none",
     "square-block",
@@ -48,6 +51,14 @@ export default function Tetris({
     "j-block",
     "t-block",
   ];
+
+  useEffect(() => {
+    if (gameOver && setNewScoreFlag) {
+      setNewScoreFlag(true);
+    } else {
+      setNewScoreFlag(false);
+    }
+  }, [gameOver, setNewScoreFlag]);
 
   // handle socket.io communication
   useEffect(() => {
@@ -152,8 +163,9 @@ export default function Tetris({
   return (
     <>
       <Card className="game-window">
-        <p className="player-info">
-          Player-{primaryPlayer ? "1" : "2"}: {displayName}
+        <p className="player-info d-flex justify-content-between pe-3">
+          <span>Player-{primaryPlayer ? "1" : "2"}</span>
+          <span>{displayName}</span>
         </p>
         <Card.Body className="game-body">
           <BlockZone
@@ -169,7 +181,7 @@ export default function Tetris({
         </Card.Body>
       </Card>
       {primaryPlayer && !(twoPlayerMode && running === "running") && (
-        <Card className="game-controls mt-3">
+        <Card className="game-controls mt-3 border-0">
           {running === "not-started" && (
             <Button variant="primary" onClick={handleStart}>
               Start
