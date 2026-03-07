@@ -1,5 +1,3 @@
-// Login.jsx
-
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -34,10 +32,18 @@ export default function Login({
   const handleClose = () => {
     if (dismissable || username) {
       setShow(false);
+      setView("login");
     } else {
       setToastMessage("User log-in required");
       setToast(true);
     }
+  };
+
+  const changeView = (view) => {
+    setUsername("");
+    setPassword("");
+    setPasswordCheck("");
+    setView(view);
   };
 
   const handleLogin = async () => {
@@ -48,7 +54,6 @@ export default function Login({
     });
     const res = await post.json();
 
-    console.log(res.success, res.username);
     if (res.success && res.username) {
       // successful login
       setUsernameParent(res.username);
@@ -59,29 +64,25 @@ export default function Login({
     }
   };
 
-  const handleNewAccount = async () => {
-    if (password === passwordCheck) {
-      const post = await fetch(`${BACKEND_URL}/new-account`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-      const { success } = await post.json();
-      if (success) {
-        setView("login");
-      } else {
-        setToastMessage("Account registration failed. Please retry");
-        setToast(true);
-      }
-    } else {
-      setToastMessage("Passwords do not match");
+  const handleAccountUpdate = async (url) => {
+    if (!username || username === "") {
+      setToastMessage("Please enter a username");
       setToast(true);
+      return false;
     }
-  };
+    if (
+      !password ||
+      password === "" ||
+      !passwordCheck ||
+      passwordCheck === ""
+    ) {
+      setToastMessage("Please complete password fields");
+      setToast(true);
+      return false;
+    }
 
-  const handleUpdatePassword = async () => {
     if (password === passwordCheck) {
-      const post = await fetch(`${BACKEND_URL}/password-reset`, {
+      const post = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -89,19 +90,28 @@ export default function Login({
       const { success } = await post.json();
       if (success) {
         setView("login");
-      } else {
-        setToastMessage("Password update failed. Please retry");
-        setToast(true);
+        return true;
       }
     } else {
       setToastMessage("Passwords do not match");
       setToast(true);
+      return false;
     }
+
+    // Defaul failure message
+    setToastMessage("Account update failed. Please retry");
+    setToast(true);
+    return false;
   };
 
   return (
     <>
-      <Modal show={show} onHide={handleClose} data-bs-theme="dark">
+      <Modal
+        show={show}
+        onHide={handleClose}
+        backdrop="static"
+        data-bs-theme="dark"
+      >
         {view === "login" && (
           <EnterPassword
             show={show}
@@ -109,29 +119,31 @@ export default function Login({
             setUsername={setUsername}
             setPassword={setPassword}
             handleLogin={handleLogin}
-            setView={setView}
+            changeView={changeView}
           />
         )}
         {view === "new" && (
-          <NewAccount
-            show={show}
-            handleClose={handleClose}
+          <UpdateAccount
+            title={"New Account"}
             setUsername={setUsername}
             setPassword1={setPassword}
             setPassword2={setPasswordCheck}
-            handleNewAccount={handleNewAccount}
-            setView={setView}
+            handleAccountUpdate={() =>
+              handleAccountUpdate(`${BACKEND_URL}/new-account`)
+            }
+            changeView={changeView}
           />
         )}
         {view === "reset" && (
-          <ResetPassword
-            show={show}
-            handleClose={handleClose}
+          <UpdateAccount
+            title={"Reset Password"}
             setUsername={setUsername}
             setPassword1={setPassword}
             setPassword2={setPasswordCheck}
-            handleUpdatePassword={handleUpdatePassword}
-            setView={setView}
+            handleAccountUpdate={() =>
+              handleAccountUpdate(`${BACKEND_URL}/password-reset`)
+            }
+            changeView={changeView}
           />
         )}
       </Modal>
@@ -156,12 +168,11 @@ export default function Login({
 }
 
 function EnterPassword({
-  show,
   handleClose,
   setUsername,
   setPassword,
   handleLogin,
-  setView,
+  changeView,
 }) {
   return (
     <>
@@ -192,10 +203,10 @@ function EnterPassword({
         <Button variant="secondary" onClick={handleClose}>
           Cancel
         </Button>
-        <Button variant="secondary" onClick={() => setView("new")}>
+        <Button variant="secondary" onClick={() => changeView("new")}>
           New Account
         </Button>
-        <Button variant="secondary" onClick={() => setView("reset")}>
+        <Button variant="secondary" onClick={() => changeView("reset")}>
           Reset Password
         </Button>
         <Button variant="primary" onClick={handleLogin}>
@@ -206,19 +217,18 @@ function EnterPassword({
   );
 }
 
-function NewAccount({
-  show,
-  handleClose,
+function UpdateAccount({
+  title,
   setUsername,
   setPassword1,
   setPassword2,
-  handleNewAccount,
-  setView,
+  handleAccountUpdate,
+  changeView,
 }) {
   return (
     <>
       <Modal.Header closeButton>
-        <Modal.Title>Reset Password</Modal.Title>
+        <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -248,55 +258,11 @@ function NewAccount({
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setView("login")}>
+        <Button variant="secondary" onClick={() => changeView("login")}>
           Back
         </Button>
-        <Button variant="primary" onClick={handleNewAccount}>
+        <Button variant="primary" onClick={handleAccountUpdate}>
           Save
-        </Button>
-      </Modal.Footer>
-    </>
-  );
-}
-
-function ResetPassword({
-  show,
-  handleClose,
-  setPassword1,
-  setPassword2,
-  handleUpdatePassword,
-  setView,
-}) {
-  return (
-    <>
-      <Modal.Header closeButton>
-        <Modal.Title>Reset Password</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form>
-          <Form.Group className="mb-3" controlId="formUsername">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Enter password"
-              onChange={(e) => setPassword1(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="formPassword">
-            <Form.Control
-              type="password"
-              placeholder="Re-enter password"
-              onChange={(e) => setPassword2(e.target.value)}
-            />
-          </Form.Group>
-        </Form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={() => setView("login")}>
-          Back
-        </Button>
-        <Button variant="primary" onClick={handleUpdatePassword}>
-          Update
         </Button>
       </Modal.Footer>
     </>

@@ -1,0 +1,18 @@
+# .github/workflows/ci.yaml
+
+# Execute fronte and backend tests
+
+name: CI Tests
+on: [push]
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm install
+      - name: Run Jest tests
+        run: npm run test

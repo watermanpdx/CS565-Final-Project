@@ -34,9 +34,9 @@ export default function Leaderboard() {
         <Row className="justify-content-center">
           <Col lg={8}>
             <Card className="d-flex align-items-center justify-content-center mt-3 p-1 border-0">
-              <h4>High-Scores</h4>
+              <h4 className="leaderboard-title">High-Scores</h4>
             </Card>
-            <Card className="leaderboard-card mt-2 mb-3 border-0">
+            <Card className="leaderboard-header leaderboard-card mt-2 mb-3 border-0">
               <div className="d-flex align-items-end justify-content-start px-4 py-1">
                 <span className="leaderboard-entry">Rank</span>
                 <span className="leaderboard-entry">Player</span>
@@ -46,7 +46,10 @@ export default function Leaderboard() {
               </div>
             </Card>
             {scores.map((score, i) => (
-              <Card key={score.id} className="leaderboard-card mt-2 border-0">
+              <Card
+                key={score.id}
+                className="leaderboard-item leaderboard-card mt-2 border-0"
+              >
                 <div className="d-flex align-items-end justify-content-start px-4 py-1">
                   <span className="leaderboard-entry">{i + 1}</span>
                   <span className="leaderboard-entry">{score.username}</span>
@@ -93,9 +96,9 @@ export function MiniLeaderboard({ newScoreFlag }) {
     <>
       <div className="h-50" data-bs-theme="dark">
         <Card className="d-flex align-items-center justify-content-center p-1 border-0">
-          <h4>Leaderboard</h4>
+          <h4 className="leaderboard-title">Leaderboard</h4>
         </Card>
-        <Card className="leaderboard-card mt-2 mb-3 border-0">
+        <Card className="leaderboard-header leaderboard-card mt-2 mb-3 border-0">
           <div className="d-flex align-items-center justify-content-start px-4 py-1">
             <span className="mini-leaderboard-rank">Rank</span>
             <span className="mini-leaderboard-entry">Player</span>
@@ -103,7 +106,10 @@ export function MiniLeaderboard({ newScoreFlag }) {
           </div>
         </Card>
         {scores.map((score, i) => (
-          <Card key={score.id} className="leaderboard-card mt-2 border-0">
+          <Card
+            key={score.id}
+            className="leaderboard-item leaderboard-card mt-2 border-0"
+          >
             <div className="d-flex align-items-center justify-content-start px-4 py-1">
               <span className="mini-leaderboard-rank">{i + 1}</span>
               <span className="mini-leaderboard-entry">{score.username}</span>
