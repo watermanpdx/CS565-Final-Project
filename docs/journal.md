@@ -123,4 +123,6 @@ I also chose to make my tests very "granular". As an example, have many tests wi
 
 I then expanded testing to the `Leaderboard` and `About` components. This was a bit faster having familiarized with the syntax a bit, but I still encountered some challenges. One further challenge that I encountered was aligning the needs for `async`, `await`, and the `Jest` function `act()`. Although I was able to get content running, I had several warnings generated due to such misalignments. This seems to have been driven by the asyncrhonous way the component itself updated (having internal async needs like fetch). I was able to resolve the warnings following the terminal recommendation to protect the component rendering via `act()`. This resolved the issues, but I have to admit that I still struggle with fully keeping track of the `async`, `await`, and `act()` needs, and need some more experience in.
 
+https://www.w3schools.com/git/git_cicd.asp?remote=github
+
 # References
