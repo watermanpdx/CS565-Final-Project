@@ -55,7 +55,7 @@ export default function Tetris({
   useEffect(() => {
     if (gameOver && setNewScoreFlag) {
       setNewScoreFlag(true);
-    } else {
+    } else if (setNewScoreFlag) {
       setNewScoreFlag(false);
     }
   }, [gameOver, setNewScoreFlag]);

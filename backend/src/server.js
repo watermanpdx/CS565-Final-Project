@@ -1,6 +1,7 @@
 // server.js
 
-const cors = require("cors");
+const path = require("path");
+//const cors = require("cors");
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -199,15 +200,8 @@ io.on("connection", (socket) => {
 });
 
 // REST and routing -----------------------------------------------------------
-app.use(cors({ origin: "http://localhost:3000" }));
+//app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
-
-// Hello world
-app.get("/", (req, res) => {
-  res.status(200);
-  res.set({ "Content-Type": "text/html" });
-  res.send("Hello world!");
-});
 
 app.get("/scores", (req, res) => {
   const maxEntries = req.query.maxEntries
@@ -275,6 +269,11 @@ app.post("/password-reset", (req, res) => {
 });
 
 // Start server
+app.use(express.static(path.join(__dirname, "../../frontend/build")));
+app.get("*path", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });

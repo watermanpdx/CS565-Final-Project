@@ -128,4 +128,9 @@ I then expanded testing to the `Leaderboard` and `About` components. This was a 
 
 The last change I made in this update was to attach the added tests to GitHub actions. This was pretty straight-forward following easily accessible [tutorials](https://www.w3schools.com/git/git_cicd.asp?remote=github). However, I did run into one small issue. Locally, I was finding that `npm test` was not running over all of my components; there seemed to be some intelligence on only testing components which were detected to have updated. This is a nice feature for local development, but my preference was for actions to always execute all of my tests. I found [online reference](https://jestjs.io/docs/cli) to the `--watchAll` flag to ensure all tests would be run. I created a dedicated `test-ci` script in `package.json` with the flag added to resolve this... However, this resulted in the GitHub action hanging (never completing) on GitHub even though the tests for my components had completed (and passed). I found that this actually wasn't needed; that the pipeline automatically [executes all tests](https://stackoverflow.com/questions/58408035/whats-the-difference-between-watchall-false-and-ci-true). Removing the flag and using the default `npm test` was sufficient.
 
+# Serving Frontend and Deployment Prep
+
+https://www.hostinger.com/tutorials/how-to-use-node-js-with-docker?utm_campaign=Generic-Tutorials-DSA-t1|NT:Se|Lang:EN|LO:DE&utm_medium=ppc&gad_source=1&gad_campaignid=16184995375&gclid=CjwKCAiAtq_NBhA_EiwA78nNWGKxob7RU4X5OG98zKkd9uSUeIZvWNEsi0VvU75iJRc07AFQQh8PEhoC5ZgQAvD_BwE
+https://www.reddit.com/r/reactjs/comments/1mtxknv/how_do_you_guys_serve_a_react_project_with_express/
+
 # References

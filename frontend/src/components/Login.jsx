@@ -7,8 +7,6 @@ import ToastContainer from "react-bootstrap/ToastContainer";
 
 import { useState, useEffect } from "react";
 
-import { BACKEND_URL } from "../config.js";
-
 export default function Login({
   show,
   setShow,
@@ -47,7 +45,7 @@ export default function Login({
   };
 
   const handleLogin = async () => {
-    const post = await fetch(`${BACKEND_URL}/login`, {
+    const post = await fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -128,9 +126,7 @@ export default function Login({
             setUsername={setUsername}
             setPassword1={setPassword}
             setPassword2={setPasswordCheck}
-            handleAccountUpdate={() =>
-              handleAccountUpdate(`${BACKEND_URL}/new-account`)
-            }
+            handleAccountUpdate={() => handleAccountUpdate("/new-account")}
             changeView={changeView}
           />
         )}
@@ -140,9 +136,7 @@ export default function Login({
             setUsername={setUsername}
             setPassword1={setPassword}
             setPassword2={setPasswordCheck}
-            handleAccountUpdate={() =>
-              handleAccountUpdate(`${BACKEND_URL}/password-reset`)
-            }
+            handleAccountUpdate={() => handleAccountUpdate("/password-reset")}
             changeView={changeView}
           />
         )}

@@ -10,14 +10,12 @@ import "./Leaderboard.css";
 
 import { useState, useEffect } from "react";
 
-import { BACKEND_URL } from "../config.js";
-
 export default function Leaderboard() {
   const [scores, setScores] = useState([]);
 
   useEffect(() => {
     async function getScores() {
-      const res = await fetch(`${BACKEND_URL}/scores`, {
+      const res = await fetch("/scores", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -81,7 +79,7 @@ export function MiniLeaderboard({ newScoreFlag }) {
 
   useEffect(() => {
     async function getScores() {
-      const res = await fetch(`${BACKEND_URL}/scores?maxEntries=3`, {
+      const res = await fetch("/scores?maxEntries=3", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
