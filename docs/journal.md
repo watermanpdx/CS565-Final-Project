@@ -116,7 +116,7 @@ In this update, I also addressed some minor and major bugs. The biggest bug I en
 ## Testing
 
 Branch: [`testing/add-test-cases`](https://github.com/watermanpdx/CS565-Final-Project/tree/testing/add-test-cases)
-Commit: []()
+Commit: [7d48c4e](https://github.com/watermanpdx/CS565-Final-Project/commit/7d48c4e5845f88645268e654f1ed11870e261457)
 
 In this update I added testing for `React` components via `Jest`.I struggled a bit with familiarizing myself with `Jest` and getting it to initially run. Specifically, it took some time to familiarize myself with the syntax and understand how to define external conditions to the component under test ([beginners-guide](https://daily.dev/blog/react-js-jest-beginners-guide)). I found that the use of both []`jest.fn()` and `global.fetch`](https://www.leighhalliday.com/mock-fetch-jest) could be used as a surrogate for external functions (passed through props) and to "replace" the response of `fetch`. I also struggled a bit with just understanding the terminal response from the test results themselves; when failing a lot of `DOM` content is passed into the terminal and the terminal seems to show (at least in my environment) the results of previous tests, making parsing through it a bit challenging. I can appreciate how this may be helpful for CI/CD environments where the execution may be on a remote machine, and getting a fuller context is likely helpful. These issues were by no means blockers or even "issues", it just took some time to familiarize with.
 
