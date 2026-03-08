@@ -1,22 +1,28 @@
 // App.jsx
 
-import "./App.css";
-import Home from "./components/Home.jsx";
-import Leaderboard from "./components/Leaderboard.jsx";
-import NavigationBar from "./components/NavigationBar.jsx";
+import './App.css';
+import Home from './components/Home.jsx';
+import Leaderboard from './components/Leaderboard.jsx';
+import NavigationBar from './components/NavigationBar.jsx';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export default function App() {
-  const [view, setView] = useState("home");
-  const [username, setUsername] = useState(sessionStorage.getItem("username"));
+  const [view, setView] = useState(sessionStorage.getItem('view') || 'home');
+  const [username, setUsername] = useState(
+    sessionStorage.getItem('username') || null,
+  );
   const [gameFocus, setGameFocus] = useState(true);
 
   useEffect(() => {
+    sessionStorage.setItem('view', view);
+  }, [view]);
+
+  useEffect(() => {
     if (username) {
-      sessionStorage.setItem("username", username);
+      sessionStorage.setItem('username', username);
     } else {
-      sessionStorage.removeItem("username", username);
+      sessionStorage.removeItem('username', username);
     }
   }, [username]);
 
@@ -29,8 +35,8 @@ export default function App() {
         setGameFocus={setGameFocus}
       />
       <div>
-        {view === "home" && <Home username={username} gameFocus={gameFocus} />}
-        {view === "leaderboard" && <Leaderboard />}
+        {view === 'home' && <Home username={username} gameFocus={gameFocus} />}
+        {view === 'leaderboard' && <Leaderboard />}
       </div>
     </>
   );

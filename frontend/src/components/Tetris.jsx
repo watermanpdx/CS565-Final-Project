@@ -1,14 +1,42 @@
 // Tetris.jsx
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
+/*
+This component is responsible for rendering the Tetris game. It is closely
+aligned with the backend tetris.js, however where tetris.js is responsible
+for game states and execution, Tetris.jsx is only responsible for rendering
+game graphics and communitating user input to the server.
 
-import "./Tetris.css";
+Tetris.jsx is dependent on Tetris-game specific stylings in Tetris.css
+*/
 
-import { useState, useEffect } from "react";
-import { socket } from "../socket";
+// dependencies ---------------------------------------------------------------
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Card from 'react-bootstrap/Card';
+import Button from 'react-bootstrap/Button';
 
+import './Tetris.css';
+
+import { useState, useEffect } from 'react';
+import { socket } from '../socket';
+
+// constants ------------------------------------------------------------------
+const GRID_WIDTH = 10;
+const GRID_HEIGHT = 20;
+const NEXT_WIDTH = 4;
+const NEXT_HEIGHT = 4;
+
+const BLOCK_TYPES = [
+  'block-none',
+  'square-block',
+  'line-block',
+  's-block',
+  'z-block',
+  'l-block',
+  'j-block',
+  't-block',
+];
+
+// Tetris definition (default export) -----------------------------------------
 export default function Tetris({
   username = null,
   primaryPlayer = true,
@@ -18,11 +46,9 @@ export default function Tetris({
 }) {
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
-  const [running, setRunning] = useState("not-started");
+  const [running, setRunning] = useState('not-started');
   const [displayName, setDisplayName] = useState(null);
 
-  const GRID_WIDTH = 10;
-  const GRID_HEIGHT = 20;
   const [grid, setGrid] = useState(
     Array(GRID_HEIGHT)
       .fill(null)
@@ -31,8 +57,6 @@ export default function Tetris({
       }),
   );
 
-  const NEXT_WIDTH = 4;
-  const NEXT_HEIGHT = 4;
   const [nextBlock, setNextBlock] = useState(
     Array(NEXT_HEIGHT)
       .fill(null)
@@ -40,17 +64,6 @@ export default function Tetris({
         return Array(NEXT_WIDTH).fill(0);
       }),
   );
-
-  const BLOCK_TYPES = [
-    "block-none",
-    "square-block",
-    "line-block",
-    "s-block",
-    "z-block",
-    "l-block",
-    "j-block",
-    "t-block",
-  ];
 
   useEffect(() => {
     if (gameOver && setNewScoreFlag) {
@@ -63,7 +76,7 @@ export default function Tetris({
   // handle socket.io communication
   useEffect(() => {
     if (username) {
-      socket.emit("game-connect", {
+      socket.emit('game-connect', {
         username: username,
         primaryPlayer: primaryPlayer,
         twoPlayerMode: twoPlayerMode,
@@ -95,21 +108,21 @@ export default function Tetris({
       setRunning(value);
     }
 
-    socket.on("connect", onConnect);
-    socket.on("player-update", onPlayer);
-    socket.on("running-status", onRunning);
+    socket.on('connect', onConnect);
+    socket.on('player-update', onPlayer);
+    socket.on('running-status', onRunning);
     if (primaryPlayer) {
-      socket.on("render-primary", renderGrid);
+      socket.on('render-primary', renderGrid);
     } else {
-      socket.on("render-secondary", renderGrid);
+      socket.on('render-secondary', renderGrid);
     }
 
     return () => {
-      socket.off("connect", onConnect);
-      socket.off("player-update", onPlayer);
-      socket.off("running-status", onRunning);
-      socket.off("render-primary", renderGrid);
-      socket.off("render-secondary", renderGrid);
+      socket.off('connect', onConnect);
+      socket.off('player-update', onPlayer);
+      socket.off('running-status', onRunning);
+      socket.off('render-primary', renderGrid);
+      socket.off('render-secondary', renderGrid);
     };
   }, [username, primaryPlayer, twoPlayerMode]);
 
@@ -118,28 +131,28 @@ export default function Tetris({
     const handleEvent = (event) => {
       event.preventDefault();
       switch (event.key) {
-        case "ArrowLeft":
-        case "a":
-          socket.emit("moveLeft");
+        case 'ArrowLeft':
+        case 'a':
+          socket.emit('moveLeft');
           break;
 
-        case "ArrowRight":
-        case "d":
-          socket.emit("moveRight");
+        case 'ArrowRight':
+        case 'd':
+          socket.emit('moveRight');
           break;
 
-        case "ArrowDown":
-        case "s":
-          socket.emit("moveDown");
+        case 'ArrowDown':
+        case 's':
+          socket.emit('moveDown');
           break;
 
-        case " ":
-        case "e":
-          socket.emit("rotateRight");
+        case ' ':
+        case 'e':
+          socket.emit('rotateRight');
           break;
 
-        case "q":
-          socket.emit("rotateLeft");
+        case 'q':
+          socket.emit('rotateLeft');
           break;
 
         default:
@@ -149,22 +162,22 @@ export default function Tetris({
 
     // check focus first; else event-handlers override inputs elsewhere
     if (focus && primaryPlayer) {
-      window.addEventListener("keydown", handleEvent);
+      window.addEventListener('keydown', handleEvent);
       return () => {
-        window.removeEventListener("keydown", handleEvent);
+        window.removeEventListener('keydown', handleEvent);
       };
     }
   }, [primaryPlayer, focus]);
 
   const handleStart = () => {
-    socket.emit("start");
+    socket.emit('start');
   };
 
   return (
     <>
       <Card className="game-window">
         <p className="player-info d-flex justify-content-between pe-3">
-          <span>Player-{primaryPlayer ? "1" : "2"}</span>
+          <span>Player-{primaryPlayer ? '1' : '2'}</span>
           <span>{displayName}</span>
         </p>
         <Card.Body className="game-body">
@@ -180,14 +193,14 @@ export default function Tetris({
           </div>
         </Card.Body>
       </Card>
-      {primaryPlayer && !(twoPlayerMode && running === "running") && (
+      {primaryPlayer && !(twoPlayerMode && running === 'running') && (
         <Card className="game-controls mt-3 border-0">
-          {running === "not-started" && (
+          {running === 'not-started' && (
             <Button variant="primary" onClick={handleStart}>
               Start
             </Button>
           )}
-          {running === "running" && (
+          {running === 'running' && (
             <Button variant="secondary" onClick={handleStart}>
               Restart
             </Button>
@@ -198,6 +211,7 @@ export default function Tetris({
   );
 }
 
+// BlockZone sub-component ----------------------------------------------------
 function BlockZone({ className, grid, BLOCK_TYPES }) {
   return (
     <div className={`game-col ${className}`}>
@@ -215,6 +229,7 @@ function BlockZone({ className, grid, BLOCK_TYPES }) {
   );
 }
 
+// ScoreBoard sub-component ---------------------------------------------------
 function ScoreBoard({ score }) {
   return (
     <>
@@ -226,10 +241,11 @@ function ScoreBoard({ score }) {
   );
 }
 
+// GameOver sub-component -----------------------------------------------------
 function GameOver({ gameOver }) {
-  let response = "";
+  let response = '';
   if (gameOver) {
-    response = "GAME OVER";
+    response = 'GAME OVER';
   }
 
   return (

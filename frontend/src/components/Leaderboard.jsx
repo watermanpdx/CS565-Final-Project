@@ -1,23 +1,33 @@
 // Leaderboard.jsx
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import Container from "react-bootstrap/Container";
-import Card from "react-bootstrap/Card";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+/*
+These components are responsible for rendering player scores to the "High-Scores"
+page and the "mini" leaderboard on the "Home" page
 
-import "./Leaderboard.css";
+Leaderboard.jsx is dependent on leaderboard content-specific styling in
+Leaderboard.css
+*/
 
-import { useState, useEffect } from "react";
+// dependencies ---------------------------------------------------------------
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Container from 'react-bootstrap/Container';
+import Card from 'react-bootstrap/Card';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
+import './Leaderboard.css';
+
+import { useState, useEffect } from 'react';
+
+// Leaderboard definition (default export) ------------------------------------
 export default function Leaderboard() {
   const [scores, setScores] = useState([]);
 
   useEffect(() => {
     async function getScores() {
-      const res = await fetch("/scores", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/scores', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
       });
       const data = await res.json();
       setScores(data);
@@ -56,12 +66,12 @@ export default function Leaderboard() {
                     {(Number(score.durationms) / 1000).toFixed(1)} sec
                   </span>
                   <span>
-                    {new Date(score.date).toLocaleString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
+                    {new Date(score.date).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
                     })}
                   </span>
                 </div>
@@ -74,14 +84,15 @@ export default function Leaderboard() {
   );
 }
 
+// MiniLeaderboard definition (must be explicitly included) -------------------
 export function MiniLeaderboard({ newScoreFlag }) {
   const [scores, setScores] = useState([]);
 
   useEffect(() => {
     async function getScores() {
-      const res = await fetch("/scores?maxEntries=3", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/scores?maxEntries=3', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
       });
       const data = await res.json();
       setScores(data);
