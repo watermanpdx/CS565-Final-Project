@@ -53,7 +53,7 @@ export default function Leaderboard() {
                   <span className="leaderboard-entry">{score.username}</span>
                   <span className="leaderboard-entry">{score.score}</span>
                   <span className="leaderboard-entry">
-                    {(score.durationMs / 1000).toFixed(1)} sec
+                    {(Number(score.durationms) / 1000).toFixed(1)} sec
                   </span>
                   <span>
                     {new Date(score.date).toLocaleString("en-US", {
