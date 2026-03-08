@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // reset the current game
+  // reset the current room/game
   socket.on('reset', () => {
     if (room) {
       room.stop();

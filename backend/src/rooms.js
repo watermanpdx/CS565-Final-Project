@@ -6,14 +6,19 @@ This file is responsible for defining Room objects used to contain and manage
 objects to view and play against other players.
 */
 
-// Dependencies ---------------------------------------------------------------
+// dependencies ---------------------------------------------------------------
 const CallbackList = require('./utilities.js');
 const Tetris = require('./tetris.js');
+
+// functions ------------------------------------------------------------------
+const generateId = function generateRandomId(maxValue = 1000000) {
+  return Math.floor(Math.random() * 1000000);
+};
 
 // Room/Rooms classes ---------------------------------------------------------
 class Room {
   constructor(twoPlayerMode, username = null) {
-    this.id = Math.floor(Math.random() * 1000000);
+    this.id = generateId();
     this.twoPlayerMode = twoPlayerMode;
     this.slot1 = {
       game: new Tetris(),

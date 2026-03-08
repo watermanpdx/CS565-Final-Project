@@ -19,6 +19,23 @@ import './Tetris.css';
 import { useState, useEffect } from 'react';
 import { socket } from '../socket';
 
+// constants ------------------------------------------------------------------
+const GRID_WIDTH = 10;
+const GRID_HEIGHT = 20;
+const NEXT_WIDTH = 4;
+const NEXT_HEIGHT = 4;
+
+const BLOCK_TYPES = [
+  'block-none',
+  'square-block',
+  'line-block',
+  's-block',
+  'z-block',
+  'l-block',
+  'j-block',
+  't-block',
+];
+
 // Tetris definition (default export) -----------------------------------------
 export default function Tetris({
   username = null,
@@ -32,8 +49,6 @@ export default function Tetris({
   const [running, setRunning] = useState('not-started');
   const [displayName, setDisplayName] = useState(null);
 
-  const GRID_WIDTH = 10;
-  const GRID_HEIGHT = 20;
   const [grid, setGrid] = useState(
     Array(GRID_HEIGHT)
       .fill(null)
@@ -42,8 +57,6 @@ export default function Tetris({
       }),
   );
 
-  const NEXT_WIDTH = 4;
-  const NEXT_HEIGHT = 4;
   const [nextBlock, setNextBlock] = useState(
     Array(NEXT_HEIGHT)
       .fill(null)
@@ -51,17 +64,6 @@ export default function Tetris({
         return Array(NEXT_WIDTH).fill(0);
       }),
   );
-
-  const BLOCK_TYPES = [
-    'block-none',
-    'square-block',
-    'line-block',
-    's-block',
-    'z-block',
-    'l-block',
-    'j-block',
-    't-block',
-  ];
 
   useEffect(() => {
     if (gameOver && setNewScoreFlag) {

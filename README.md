@@ -75,3 +75,19 @@ Instructions on how to play can be accessed via the "How-to-play" link in the Na
 Click on the "High-Scores" link in the Navbar at the top of the sign to get to see a list of high-scores from all players.
 
 ![high-scores](./docs/screenshots/high-scores.jpg)
+
+## Supplementary
+
+### Unit Tests and GitHub Actions
+
+Unit tests via `Jest` have been created for select frontend `React` components. Tests can be found in `./frontend/src/tests/` and executed from `./frontend/` via:
+
+```bash
+npm run test
+```
+
+Tests are automatically run on Git `push` via the actions defined in `.github/workflows/ci.yml`.
+
+### APIs
+
+This codebase uses custom `REST` and `socket.io` APIs between the frontend and backend code. Documentation of APIs can be found in [./docs/apis.md](./docs/apis.md).

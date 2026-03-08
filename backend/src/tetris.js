@@ -27,6 +27,11 @@ const BLOCK_ENUM = {
   T_BLOCK: 7,
 };
 
+// functions ------------------------------------------------------------------
+const randomInt = function randomIntegerBetweenZeroAndN(N = 100) {
+  return Math.floor(Math.random() * N);
+};
+
 // Block (base) class ---------------------------------------------------------
 class Block {
   /*
@@ -144,7 +149,7 @@ class Block {
   }
 
   checkCollision() {
-    let shape = this.shapes[this.shapesIndex];
+    const shape = this.shapes[this.shapesIndex];
     for (let j = 0; j < this.size; j++) {
       for (let i = 0; i < this.size; i++) {
         if (
@@ -443,7 +448,7 @@ class Tetris {
   }
 
   getRandomBlock() {
-    let i = Math.floor(Math.random() * BLOCKS.length);
+    let i = randomInt(BLOCKS.length);
     return new BLOCKS[i](this);
   }
 
@@ -584,7 +589,7 @@ class Tetris {
   }
 
   removeOnStart(handle) {
-    this.onStartHandles.remove(handles);
+    this.onStartHandles.remove(handle);
   }
 
   attachOnUpdate(handle) {

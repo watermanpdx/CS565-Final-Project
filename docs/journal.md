@@ -1,3 +1,21 @@
+# About
+
+The following is the "development journal" for the contents of this project. In it is documented the major updates with GitHub branch and commit references. It documents the development process through the project capturing how the project evolved, what decisions were made, and what challenges were encountered.
+
+## Author
+
+Tayte Waterman
+[watermanpdx](https://github.com/watermanpdx), [TayticusPrime](https://github.com/watermanpdx)
+[Portland State University](https://www.pdx.edu/) (Student)
+CS656 - Full Stack Web Development
+Winter 2026
+
+## Deployed Site and Source
+
+Deployed site: [cs565-final-project-tayte-waterman.com](http://cs565-final-project-tayte-waterman.com)
+
+Source repository: [cs565-final-project-tayte-waterman.com](http://cs565-final-project-tayte-waterman.com)
+
 # Journal
 
 ## Project Initialization Hello World
@@ -145,6 +163,97 @@ It should be noted, I chose to commit `.env` to my project repo and reference it
 
 ## Deployment, Cleanup, and Documentation
 
+Branch: [`feature/cleanup-and-deployment`](https://github.com/watermanpdx/CS565-Final-Project/tree/feature/cleanup-and-deployment)
+Commit: []()
+
 In this update I deployed my website to a VM so that it can be accessed on the web. I chose to use [Google Cloud Services](https://cloud.google.com/free?utm_source=google&utm_medium=cpc&utm_campaign=Cloud-SS-DR-GCP-1713666-GCP-DR-EMEA-DE-en-Google-BKWS-MIX-na&utm_content=c-Hybrid+%7C+BKWS+-+MIX+%7C+Txt+-+Generic+Cloud-Cloud+Generic-Core+GCP-6458750523&utm_term=google+cloud&gclsrc=aw.ds&gad_source=1&gad_campaignid=20535180213&gclid=Cj0KCQiA2bTNBhDjARIsAK89wlEj4tiSWGBFDzxKv2_EiLrad3dJlzPbh_4JTTYf2V2W0ugQvirPPKkaAj8FEALw_wcB), and purchase and host a domain via [Squarespace](<https://www.squarespace.com/websites-start?channel=pbr&subchannel=go&campaign=pbr-go-de-multi-core_squarespacealone-mix&subcampaign=(squarespacealone-en_squarespace_e)&gclsrc=aw.ds&gad_source=1&gad_campaignid=23337823350&gclid=Cj0KCQiA2bTNBhDjARIsAK89wlE38HgeCI_2smqlgoA2AYoBqoEtXkqnqFpSokRy_ADsg_0fT94UCBYaAulMEALw_wcB>). Following the updates to contain the frontend, backend, and database within a single `Docker Compose` config this was very easy to deploy. I only needed to purchase a VM, SSH into it, clone my repo into it, and add the `docker compose up` call into `systemd` to ensure it ran when the VM started. Once running, I then only needed to add a firewall rule to my VM to expose the server port and I was able to access the site via the VM public (static) ip. I then purchased the domain [cs565-final-project-tayte-waterman.com](http://cs565-final-project-tayte-waterman.com/) via Squarespace, and via its DNS settings in my account, pointed it to the external ip address of my VM. One thing I uncovered that I didn't really like was that this worked, but it required an explicit reference to the exposed port (`3001`). I did some very cursory research and found that aliasing the url to an ip + port is not possible via the DNS in Squarespace, but is possible with reverse-proxying with services like [`nginx`](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/). However, this would just add more complexity which I believe is stretching beyond the scope of this project. Instead, I chose to simply change `.env`, the defaults in `server.js` and the Docker port:port bindings to expose port `80` directly. Following this, the sight is now running on the web at [cs565-final-project-tayte-waterman.com](http://cs565-final-project-tayte-waterman.com/).
 
+I also attempted to go through my codebase and review it per AirBnB Design Guidelines for [JavaScript](https://github.com/airbnb/javascript) and [React](https://github.com/airbnb/javascript/tree/master/react). This proved to be rather challenging as I decided to take it on in the final review. It would have been better to pre-review and incrementally update and review throughout development. Unfortunately, I fear that at this state of my code, my code is simply too large and complex for me to metnally capture everything. I have tried to address where I can, but fear that I have not been able to capture everything. Some areas I did find and address: I found that my local Visual Studio Code Prettier config was setting all quotes to `"` instead of the recommended `'`. I added a local, overriding `.prettierrc` config to reset this to `'`. I also found that there were several areas where I had stray uses of `let` where `const` would suffice. I modularized some of the `Math()` calls into helper functions to better describe explicitly what was being done (generating random ids, random integers, etc). I also pulled many constants out of React components where they could sufficiently be described at the top of their files.
+
+# Conclusion
+
+This project was very helpful in learning and applying fullstack web technologies. Of highlight, and the newest technologies to me personally, were socket.io, REST APIs serving through express, React, and backend database handling. With these technologies I was able to successfully implement a multi-player Tetris game rendered via React, but controlled via a backend with persistent data stored and managed within a PostgreSQL database.
+
+I hade little experience with React before this project, and had never build an application this complex before including a database-connected server, or one with complex states communicating via socket.io. I learned quite a bit and gained an appreciation for the special skill sets distinct to frontend and backend implementation. I appreciated that this poroject allowed for such a broad range of topics to explore, and the freedom of design and exploration it allowed. I really feel that I've learned a lot from this project alone!
+
+Of most remark to me was React. Coming from a more embedded background, React felt very unnatural to me at first. I struggled a lot with managing states, where they should reside, how and when to pass contents via props, and how to ensure components were updating when expected. I learned that often it is best to orchestrate states high up in the component heirarchy and pass to children rather than "encapsulating" too tightly within components. Add on to this the Jest framework, and it took several updates and a lot of debugging before I started getting a better "mental model" of how to use React. I appreciate its modular approach where sections of a webpage can be broken down into individual components. Doing so with each of the major components of my webpage really helped in the organization and mental-tracking of my webpage. In the end, I really like React, but can appreciate how much experience it may take to become skilled at it.
+
+One area I really struggled was in the state management of the Tetris game itself and how it communicated with the front-end. As mentioned in the journal, I initially had a wrong model for how the games should be managed on the backend, and basic misunderstandings of how the socket.io connections were managed. I ultimately had to heavily refactor my server code to get it under control. That said, I still encounter some corner-case states which are not desirable (occasional needs to refresh before the game will start), but due to the current complexity have struggled to address them without other adverse effects. I beleive this is compounded by the fact that I initially was very unclear (still no expert) in how and when React component render and how they are called in their heirarchy. Since many socket.io messages initiate from the frontend, tracking all the possible states between React rendering, server game and room management, and socket.io connections; it was very challenging to get stable communication up and running. If I had more time, I would review this as I fear it is less than "optimally" robust. However, given the timing and breadth of this project I don't believe it practical to address this.
+
+Although not directly in the core scope of the project, I found the deployment via Docker very helpful. Once I got the initial project up and running, I locally transfered it to a pair of Docker containers orchestrated by a Docker Compose configuration. Getting this running on my local machine, via the properties of Docker, meant that the project could then easily be deployed to other environments without having to worry about machine specific dependencies. Once the site was working locally via Docker Compose, transferring it to a VM was trivial.
+
+The use of unit-tests and CI pipelines via GitActions and Jest was also very helpful. Honestly, although the testing framework is very helpful in preserving functionality, I found the exercise of creating the tests themselves the most valuable. I found many bugs not from executing the tests themselves, but just from the action of designing the tests and realizing I had made functional omissions. In the future I would propose creating the tests in tandem with the development or even preceding it. Although I added a pipeline to test in GitHub, I did not connect it to any GitHub rules in the project base, or connect it to further deployments. For the deployment to my VM I remote into the VM and manually pull the latest state of the repo. For a production system I would instead invest in connecting the testing into checks that gate automatic deployment of the repo contents into the VM. Rather than manually SSH'ing and pulling it, updating the repo via a merge should instead automaticaly deploy to the VM. However, for the scope of this project I chose to keep this as a manual process for now.
+
+Last, regarding the overall codebase itself and quality of the website, I feel this project ended up being an exercise in "breadth" rather than "depth" in all areas. I feel that I was able to interact with each technology enough to get sufficient "depth" of understanding and experience for my own learning, however the quality of my weibsite slightly suffered due to scope. I fear the scope of this project may have been a bit overly ambitious. There remain some corner-case issues, I fear I have not addressed all style-guidelines, and I have not deeply addressed frontend checks for accessibility and and how reactive the site is for different screen sizes (frankly, it will not extend to phones both in size and lack of non-keyboard controls). As many of these topics have been covered in other courses, I chose to focus my efforts on the new technologies, and ensurince sufficient complexity in my application to demonstrate a "full stack" rather than making it perfect. Given more time I would spend more time in addressing quality and completing test coverage.
+
 # References
+
+- "Getting Started – Create React App," create-react-app.dev. [Online]. Available: [https://create-react-app.dev/docs/getting-started/](https://create-react-app.dev/docs/getting-started/)
+
+- "How to handle the onKeyPress event in ReactJS," Stack Overflow. [Online]. Available: [https://stackoverflow.com/questions/27827234/how-to-handle-the-onkeypress-event-in-reactjs](https://stackoverflow.com/questions/27827234/how-to-handle-the-onkeypress-event-in-reactjs)
+
+- "Event listeners in React components," Pluralsight. [Online]. Available: [https://www.pluralsight.com/resources/blog/guides/event-listeners-in-react-components](https://www.pluralsight.com/resources/blog/guides/event-listeners-in-react-components)
+
+- "DTET Rotation System," Tetris Wiki. [Online]. Available: [https://tetris.fandom.com/wiki/DTET_Rotation_System](https://tetris.fandom.com/wiki/DTET_Rotation_System)
+
+- "Scoring," Tetris Wiki. [Online]. Available: [https://tetris.fandom.com/wiki/Scoring](https://tetris.fandom.com/wiki/Scoring)
+
+- "Create copy of multi-dimensional array, not reference, JavaScript," Stack Overflow. [Online]. Available: [https://stackoverflow.com/questions/13756482/create-copy-of-multi-dimensional-array-not-reference-javascript](https://stackoverflow.com/questions/13756482/create-copy-of-multi-dimensional-array-not-reference-javascript)
+
+- "How to use with React," Socket.IO. [Online]. Available: [https://socket.io/how-to/use-with-react](https://socket.io/how-to/use-with-react)
+
+- "React Bootstrap - Introduction," react-bootstrap.netlify.app. [Online]. Available: [https://react-bootstrap.netlify.app/docs/getting-started/introduction](https://react-bootstrap.netlify.app/docs/getting-started/introduction)
+
+- "React Bootstrap - Navbar," react-bootstrap.netlify.app. [Online]. Available: [https://react-bootstrap.netlify.app/docs/components/navbar](https://react-bootstrap.netlify.app/docs/components/navbar)
+
+- "React Bootstrap - Modal," react-bootstrap.netlify.app. [Online]. Available: [https://react-bootstrap.netlify.app/docs/components/modal](https://react-bootstrap.netlify.app/docs/components/modal)
+
+- "React Bootstrap - Forms," react-bootstrap.netlify.app. [Online]. Available: [https://react-bootstrap.netlify.app/docs/forms/overview](https://react-bootstrap.netlify.app/docs/forms/overview)
+
+- "React Bootstrap - Cards," react-bootstrap.netlify.app. [Online]. Available: [https://react-bootstrap.netlify.app/docs/components/cards](https://react-bootstrap.netlify.app/docs/components/cards)
+
+- "Tetris Guideline," Tetris Wiki. [Online]. Available: [https://tetris.fandom.com/wiki/Tetris_Guideline](https://tetris.fandom.com/wiki/Tetris_Guideline)
+
+- "better-sqlite3," w3resource. [Online]. Available: [https://www.w3resource.com/sqlite/snippets/better-sqlite3.php](https://www.w3resource.com/sqlite/snippets/better-sqlite3.php)
+
+- "Conditional Rendering," React. [Online]. Available: [https://react.dev/learn/conditional-rendering](https://react.dev/learn/conditional-rendering)
+
+- "Express.js req.query property," GeeksforGeeks. [Online]. Available: [https://www.geeksforgeeks.org/web-tech/express-js-req-query-property/](https://www.geeksforgeeks.org/web-tech/express-js-req-query-property/)
+
+- "HTML <span> Tag," W3Schools. [Online]. Available: [https://www.w3schools.com/tags/tag_span.asp](https://www.w3schools.com/tags/tag_span.asp)
+
+- "How to align nav items to the right in Bootstrap 5," Stack Overflow. [Online]. Available: [https://stackoverflow.com/questions/65253543/how-to-align-nav-items-to-the-right-in-bootstrap-5](https://stackoverflow.com/questions/65253543/how-to-align-nav-items-to-the-right-in-bootstrap-5)
+
+- "INSERT IGNORE," MariaDB Documentation. [Online]. Available: [https://mariadb.com/docs/server/reference/sql-statements/data-manipulation/inserting-loading-data/insert-ignore](https://mariadb.com/docs/server/reference/sql-statements/data-manipulation/inserting-loading-data/insert-ignore)
+
+- "React.js Jest Beginners Guide," daily.dev. [Online]. Available: [https://daily.dev/blog/react-js-jest-beginners-guide](https://daily.dev/blog/react-js-jest-beginners-guide)
+
+- "Mock fetch with Jest," L. Halliday. [Online]. Available: [https://www.leighhalliday.com/mock-fetch-jest](https://www.leighhalliday.com/mock-fetch-jest)
+
+- "Git CI/CD Tutorial," W3Schools. [Online]. Available: [https://www.w3schools.com/git/git_cicd.asp?remote=github](https://www.w3schools.com/git/git_cicd.asp?remote=github)
+
+- "Jest CLI Options," Jest. [Online]. Available: [https://jestjs.io/docs/cli](https://jestjs.io/docs/cli)
+
+- "What's the difference between --watchAll=false and CI=true?," Stack Overflow. [Online]. Available: [https://stackoverflow.com/questions/58408035/whats-the-difference-between-watchall-false-and-ci-true](https://stackoverflow.com/questions/58408035/whats-the-difference-between-watchall-false-and-ci-true)
+
+- "How do you guys serve a React project with Express?," Reddit. [Online]. Available: [https://www.reddit.com/r/reactjs/comments/1mtxknv/how_do_you_guys_serve_a_react_project_with_express/](https://www.reddit.com/r/reactjs/comments/1mtxknv/how_do_you_guys_serve_a_react_project_with_express/)
+
+- "How to Use Node.js with Docker," Hostinger. [Online]. Available: [https://www.hostinger.com/tutorials/how-to-use-node-js-with-docker](https://www.hostinger.com/tutorials/how-to-use-node-js-with-docker)
+
+- "Numeric Types - SERIAL," PostgreSQL Documentation. [Online]. Available: [https://www.postgresql.org/docs/current/datatype-numeric.html](https://www.postgresql.org/docs/current/datatype-numeric.html)
+
+- "INSERT - ON CONFLICT DO NOTHING," PostgreSQL Documentation. [Online]. Available: [https://www.postgresql.org/docs/current/sql-insert.html](https://www.postgresql.org/docs/current/sql-insert.html)
+
+- "Set environment variables in Docker Compose," Docker Documentation. [Online]. Available: [https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables/](https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables/)
+
+- "How does a container resolve the IP of another service by the service name?," Docker Forums. [Online]. Available: [https://forums.docker.com/t/how-does-a-container-resolve-the-ip-of-another-service-by-the-servicename/110091](https://forums.docker.com/t/how-does-a-container-resolve-the-ip-of-another-service-by-the-servicename/110091)
+
+- "Compose Specification - restart," compose-spec. [Online]. Available: [https://github.com/compose-spec/compose-spec/blob/main/spec.md#restart](https://github.com/compose-spec/compose-spec/blob/main/spec.md#restart)
+
+- "Environment Variables Best Practices," dev.to. [Online]. Available: [https://dev.to/khalidk799/environment-variables-its-best-practices-1o1o](https://dev.to/khalidk799/environment-variables-its-best-practices-1o1o)
+
+- "Nginx Reverse Proxy," NGINX Documentation. [Online]. Available: [https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/)
+
+- Airbnb, "JavaScript Style Guide," GitHub. [Online]. Available: [https://github.com/airbnb/javascript](https://github.com/airbnb/javascript)
+
+- Airbnb, "React/JSX Style Guide," GitHub. [Online]. Available: [https://github.com/airbnb/javascript/tree/master/react](https://github.com/airbnb/javascript/tree/master/react)
