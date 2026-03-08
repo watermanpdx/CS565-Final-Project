@@ -1,14 +1,13 @@
 // server.js
 
-const cors = require("cors");
+const path = require("path");
 const express = require("express");
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
-const port = process.env.PORT || 3001;
+const port = process.env.BACKEND_PORT || 3001;
 
-const sql = require("better-sqlite3");
-const db = new sql("database.db");
+const { Pool } = require("pg");
 
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -18,27 +17,34 @@ const rooms = new Rooms();
 const MAX_SCORE_ENTRIES = 10000;
 
 // Database (setup) -----------------------------------------------------------
-db.prepare(
-  `
+const pool = new Pool({
+  host: process.env.POSTGRES_HOST || "localhost",
+  port: process.env.POSTGRES_PORT,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
+});
+
+async function initDB() {
+  await pool.query(`
   CREATE TABLE IF NOT EXISTS users (
     username TEXT PRIMARY KEY,
     password TEXT NOT NULL
   )
-`,
-).run();
+  `);
 
-db.prepare(
-  `
+  await pool.query(`
   CREATE TABLE IF NOT EXISTS scores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     username TEXT NOT NULL,
     score INTEGER NOT NULL,
     durationMs INTEGER,
-    date DATETIME,
+    date TIMESTAMPTZ,
     UNIQUE(username, score, durationMs)
   )  
-`,
-).run();
+  `);
+}
+initDB();
 
 // Socket.IO communication ----------------------------------------------------
 io.on("connection", (socket) => {
@@ -181,12 +187,13 @@ io.on("connection", (socket) => {
     }
   }
 
-  function onEnd(game) {
+  async function onEnd(game) {
     // save score
     if (game.player && game.score > 0) {
-      db.prepare(
-        "INSERT OR IGNORE INTO scores (username, score, durationMs, date) VALUES (?, ?, ?, ?)",
-      ).run(game.player, game.score, game.durationMs, new Date().toISOString());
+      await pool.query(
+        "INSERT INTO scores (username, score, durationMs, date) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING",
+        [game.player, game.score, game.durationMs, new Date().toISOString()],
+      );
     }
 
     // clean up rooms and handles
@@ -199,82 +206,90 @@ io.on("connection", (socket) => {
 });
 
 // REST and routing -----------------------------------------------------------
-app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
 
-// Hello world
-app.get("/", (req, res) => {
-  res.status(200);
-  res.set({ "Content-Type": "text/html" });
-  res.send("Hello world!");
-});
-
-app.get("/scores", (req, res) => {
+app.get("/scores", async (req, res) => {
   const maxEntries = req.query.maxEntries
     ? req.query.maxEntries
     : MAX_SCORE_ENTRIES;
   try {
-    const scores = db
-      .prepare("SELECT * FROM scores ORDER BY score DESC LIMIT ?")
-      .all(maxEntries);
+    const data = await pool.query(
+      "SELECT * FROM scores ORDER BY score DESC LIMIT $1",
+      [maxEntries],
+    );
+    const scores = data.rows;
     res.status(200);
     res.json(scores);
-  } catch {}
+  } catch (e) {
+    console.log("score retreival failure", e.message);
+  }
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   try {
-    const record = db
-      .prepare("SELECT * FROM users WHERE username = ?")
-      .get(username);
-    if (password === record.password) {
-      //Successful login
-      res.json({ success: true, username: username });
+    const data = await pool.query("SELECT * FROM users WHERE username = $1", [
+      username,
+    ]);
+    const record = data.rows[0];
 
+    if (record && password === record.password) {
+      // successful login
+      res.json({ success: true, username: username });
       return;
     } else {
+      // unsuccessful login
       res.json({ success: false, username: null });
       return;
     }
-  } catch {
+  } catch (e) {
+    console.log("login failure", e.message);
     res.json({ success: false, username: null });
     return;
   }
 });
 
-app.post("/new-account", (req, res) => {
+app.post("/new-account", async (req, res) => {
   const { username, password } = req.body;
   try {
-    db.prepare("INSERT INTO users (username, password) VALUES (?, ?)").run(
+    await pool.query("INSERT INTO users (username, password) VALUES ($1, $2)", [
       username,
       password,
-    );
+    ]);
+
     res.json({ success: true });
     return;
-  } catch {
+  } catch (e) {
+    console.log("account creation failure", e.message);
     res.json({ success: false });
     return;
   }
 });
 
-app.post("/password-reset", (req, res) => {
+app.post("/password-reset", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    db.prepare("UPDATE users SET password = ? WHERE username = ?").run(
-      password,
+    await pool.query("UPDATE users SET password = $1 WHERE username = $2", [
       username,
-    );
+      password,
+    ]);
+
     res.json({ success: true });
     return;
-  } catch {
+  } catch (e) {
+    console.log("password-reset failure", e.message);
     res.json({ success: false });
     return;
   }
 });
 
-// Start server
+// Start server ---------------------------------------------------------------
+app.use(express.static(path.join(__dirname, "../../frontend/build")));
+app.get("*path", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
+
 server.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running on port: ${port}`);
 });
