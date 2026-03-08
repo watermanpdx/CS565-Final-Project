@@ -1,24 +1,29 @@
 // server.js
 
-const path = require("path");
-const express = require("express");
+/*
+This file contains the main backend server code for the multi-player web-page.
+It is responsible for serving the frontend (React-built) assets, hosting tetris
+instances (communicating via socket.io), and forwarding database information
+via REST to the frontend
+*/
+
+// dependencies ---------------------------------------------------------------
+const path = require('path');
+const http = require('http');
+const express = require('express');
+
+const { Pool } = require('pg');
+const { Server } = require('socket.io');
+const Rooms = require('./rooms.js');
+
+// shared server/address information ------------------------------------------
 const app = express();
-const http = require("http");
 const server = http.createServer(app);
-const port = process.env.BACKEND_PORT || 3001;
-
-const { Pool } = require("pg");
-
-const { Server } = require("socket.io");
-const io = new Server(server);
-
-const Rooms = require("./rooms.js");
-const rooms = new Rooms();
-const MAX_SCORE_ENTRIES = 10000;
+const port = process.env.BACKEND_PORT || 80;
 
 // Database (setup) -----------------------------------------------------------
 const pool = new Pool({
-  host: process.env.POSTGRES_HOST || "localhost",
+  host: process.env.POSTGRES_HOST || 'localhost',
   port: process.env.POSTGRES_PORT,
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
@@ -47,7 +52,14 @@ async function initDB() {
 initDB();
 
 // Socket.IO communication ----------------------------------------------------
-io.on("connection", (socket) => {
+const io = new Server(server);
+
+// rooms entities for game sessions management
+const rooms = new Rooms();
+const MAX_SCORE_ENTRIES = 10000;
+
+io.on('connection', (socket) => {
+  // shared connection variables
   let room = null;
   let primaryGame = null;
   let secondaryGame = null;
@@ -55,13 +67,14 @@ io.on("connection", (socket) => {
 
   console.log(`Connected to socket.id: ${socket.id}`);
 
-  socket.on("game-connect", (data) => {
+  // new game connect event from frontend
+  socket.on('game-connect', (data) => {
     username = data.username;
     const primaryPlayer = data.primaryPlayer;
     const twoPlayerMode = data.twoPlayerMode;
 
     console.log(
-      `Connecting ${twoPlayerMode ? "2-player" : "1-player"} game for: ${username}`,
+      `Connecting ${twoPlayerMode ? '2-player' : '1-player'} game for: ${username}`,
     );
 
     room = rooms.joinRoom(username, twoPlayerMode);
@@ -75,72 +88,74 @@ io.on("connection", (socket) => {
       primaryGame.attachOnUpdate(onUpdate);
       primaryGame.attachOnEnd(onEnd);
 
-      socket.emit("render-primary", primaryGame.currentState);
+      socket.emit('render-primary', primaryGame.currentState);
     } else {
       secondaryGame = room.getSecondaryGame(username);
       secondaryGame.attachOnUpdate(onUpdate);
       secondaryGame.attachOnEnd(onEnd);
 
-      socket.emit("render-secondary", secondaryGame.currentState);
+      socket.emit('render-secondary', secondaryGame.currentState);
     }
   });
 
-  socket.on("start", () => {
+  // start the game
+  socket.on('start', () => {
     if (room) {
       room.start(username);
     }
   });
 
-  socket.on("reset", () => {
+  // reset the current game
+  socket.on('reset', () => {
     if (room) {
       room.stop();
 
       if (primaryGame) {
-        socket.emit("render-primary", primaryGame.currentState);
+        socket.emit('render-primary', primaryGame.currentState);
       }
       if (secondaryGame) {
-        socket.emit("render-secondary", secondaryGame.currentState);
+        socket.emit('render-secondary', secondaryGame.currentState);
       }
-      /*
-      socket.emit(
-        "running-status",
-        room.isRunning() ? "running" : "not-started",
-      );
-      */
     }
   });
 
-  socket.on("moveLeft", () => {
+  // game-control event: left
+  socket.on('moveLeft', () => {
     if (primaryGame) {
       primaryGame.moveLeft();
     }
   });
 
-  socket.on("moveRight", () => {
+  // game-control event: right
+  socket.on('moveRight', () => {
     if (primaryGame) {
       primaryGame.moveRight();
     }
   });
 
-  socket.on("moveDown", () => {
+  // game-control event: down
+  socket.on('moveDown', () => {
     if (primaryGame) {
       primaryGame.moveDown();
     }
   });
 
-  socket.on("rotateLeft", () => {
+  // game-control event: rotate-left
+  socket.on('rotateLeft', () => {
     if (primaryGame) {
       primaryGame.rotateLeft();
     }
   });
 
-  socket.on("rotateRight", () => {
+  // game-control event: rotate-right
+  socket.on('rotateRight', () => {
     if (primaryGame) {
       primaryGame.rotateRight();
     }
   });
 
-  socket.on("disconnect", () => {
+  // socket.io disconnection
+  socket.on('disconnect', () => {
     if (primaryGame) {
       primaryGame.removeOnUpdate(onUpdate);
       primaryGame.removeOnEnd(onEnd);
@@ -156,9 +171,10 @@ io.on("connection", (socket) => {
     }
   });
 
+  // communicate player status of current room
   function onPlayer() {
     if (room) {
-      socket.emit("player-update", {
+      socket.emit('player-update', {
         primary: room.getPrimaryGame(username)
           ? room.getPrimaryGame(username).player
           : null,
@@ -169,29 +185,32 @@ io.on("connection", (socket) => {
     }
   }
 
+  // communicate running status
   function onRunning() {
     if (room) {
       socket.emit(
-        "running-status",
-        room.isRunning() ? "running" : "not-started",
+        'running-status',
+        room.isRunning() ? 'running' : 'not-started',
       );
     }
   }
 
+  // send render information to frontend on game update
   function onUpdate(game) {
     if (primaryGame) {
-      socket.emit("render-primary", primaryGame.currentState);
+      socket.emit('render-primary', primaryGame.currentState);
     }
     if (secondaryGame) {
-      socket.emit("render-secondary", secondaryGame.currentState);
+      socket.emit('render-secondary', secondaryGame.currentState);
     }
   }
 
+  // save results (score) to database at game end
   async function onEnd(game) {
     // save score
     if (game.player && game.score > 0) {
       await pool.query(
-        "INSERT INTO scores (username, score, durationMs, date) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING",
+        'INSERT INTO scores (username, score, durationMs, date) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
         [game.player, game.score, game.durationMs, new Date().toISOString()],
       );
     }
@@ -201,34 +220,36 @@ io.on("connection", (socket) => {
     game.removeOnEnd(onEnd);
 
     // inform frontend of state
-    socket.emit("running-status", game.isRunning() ? "running" : "not-started");
+    socket.emit('running-status', game.isRunning() ? 'running' : 'not-started');
   }
 });
 
 // REST and routing -----------------------------------------------------------
 app.use(express.json());
 
-app.get("/scores", async (req, res) => {
+// return scores information from the database
+app.get('/scores', async (req, res) => {
   const maxEntries = req.query.maxEntries
     ? req.query.maxEntries
     : MAX_SCORE_ENTRIES;
   try {
     const data = await pool.query(
-      "SELECT * FROM scores ORDER BY score DESC LIMIT $1",
+      'SELECT * FROM scores ORDER BY score DESC LIMIT $1',
       [maxEntries],
     );
     const scores = data.rows;
     res.status(200);
     res.json(scores);
   } catch (e) {
-    console.log("score retreival failure", e.message);
+    console.log('score retreival failure', e.message);
   }
 });
 
-app.post("/login", async (req, res) => {
+// assess user login (username + password)
+app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
-    const data = await pool.query("SELECT * FROM users WHERE username = $1", [
+    const data = await pool.query('SELECT * FROM users WHERE username = $1', [
       username,
     ]);
     const record = data.rows[0];
@@ -243,16 +264,17 @@ app.post("/login", async (req, res) => {
       return;
     }
   } catch (e) {
-    console.log("login failure", e.message);
+    console.log('login failure', e.message);
     res.json({ success: false, username: null });
     return;
   }
 });
 
-app.post("/new-account", async (req, res) => {
+// add new account to database
+app.post('/new-account', async (req, res) => {
   const { username, password } = req.body;
   try {
-    await pool.query("INSERT INTO users (username, password) VALUES ($1, $2)", [
+    await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [
       username,
       password,
     ]);
@@ -260,17 +282,18 @@ app.post("/new-account", async (req, res) => {
     res.json({ success: true });
     return;
   } catch (e) {
-    console.log("account creation failure", e.message);
+    console.log('account creation failure', e.message);
     res.json({ success: false });
     return;
   }
 });
 
-app.post("/password-reset", async (req, res) => {
+// update account with new password
+app.post('/password-reset', async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    await pool.query("UPDATE users SET password = $1 WHERE username = $2", [
+    await pool.query('UPDATE users SET password = $1 WHERE username = $2', [
       username,
       password,
     ]);
@@ -278,16 +301,16 @@ app.post("/password-reset", async (req, res) => {
     res.json({ success: true });
     return;
   } catch (e) {
-    console.log("password-reset failure", e.message);
+    console.log('password-reset failure', e.message);
     res.json({ success: false });
     return;
   }
 });
 
 // Start server ---------------------------------------------------------------
-app.use(express.static(path.join(__dirname, "../../frontend/build")));
-app.get("*path", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+app.use(express.static(path.join(__dirname, '../../frontend/build')));
+app.get('*path', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
 server.listen(port, () => {

@@ -1,9 +1,15 @@
 // utilities.js
 
+/*
+This file is responsible for common classes and functions used within the
+backend server code. It is primarily responsible for the CallbackList class
+definition which is used for managing and calling a list of callbacks.
+*/
+
 // Callbacks class ------------------------------------------------------------
 class CallbackList {
   /*
-    Datastructure for managing a list of callbacks
+    Data-structure for managing a list of callbacks
   */
   constructor(context) {
     this.context = context;

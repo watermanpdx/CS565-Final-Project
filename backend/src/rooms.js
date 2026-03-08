@@ -1,7 +1,14 @@
 // rooms.js
 
-const CallbackList = require("./utilities.js");
-const Tetris = require("./tetris.js");
+/*
+This file is responsible for defining Room objects used to contain and manage
+1-player and 2-player tetris games. Players can be added to and use the room
+objects to view and play against other players.
+*/
+
+// Dependencies ---------------------------------------------------------------
+const CallbackList = require('./utilities.js');
+const Tetris = require('./tetris.js');
 
 // Room/Rooms classes ---------------------------------------------------------
 class Room {
@@ -156,7 +163,7 @@ class Rooms {
     }
 
     console.log(
-      `Room id-${room.id}, mode: ${this.twoPlayerMode ? "2-player" : "1-player"}`,
+      `Room id-${room.id}, mode: ${this.twoPlayerMode ? '2-player' : '1-player'}`,
     );
     console.log(
       `  Players: ${room.slot1.game.player}, ${room.slot2.game.player}`,

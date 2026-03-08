@@ -1,19 +1,26 @@
 // NavigationBar.jsx
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-import NavDropdown from "react-bootstrap/NavDropdown";
+/*
+This component is responsible for the top navigation bar of the webpage. It is
+responsible for triggering view changes between "pages" and triggering modals.
+*/
 
-import HowToPlay from "../components/HowToPlay.jsx";
-import About from "../components/About.jsx";
-import Login from "../components/Login.jsx";
+// dependencies ---------------------------------------------------------------
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 
-import logo from "../assets/logo.png";
+import HowToPlay from '../components/HowToPlay.jsx';
+import About from '../components/About.jsx';
+import Login from '../components/Login.jsx';
 
-import { useState, useEffect } from "react";
+import logo from '../assets/logo.png';
 
+import { useState, useEffect } from 'react';
+
+// NavigationBar definition (default export) ----------------------------------
 export default function NavigationBar({
   username,
   setUsername,
@@ -33,7 +40,7 @@ export default function NavigationBar({
       <Navbar expand="md" className="bg-body-tertiary" data-bs-theme="dark">
         <Container>
           <Navbar.Brand href="#home">
-            <img src={logo} height="30" width="30" alt="tetris logo" />{" "}
+            <img src={logo} height="30" width="30" alt="tetris logo" />{' '}
             Multi-Player Tetris
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -41,7 +48,7 @@ export default function NavigationBar({
             <Nav className="me-auto">
               <Nav.Link
                 onClick={() => {
-                  setView("home");
+                  setView('home');
                 }}
               >
                 Home
@@ -55,7 +62,7 @@ export default function NavigationBar({
               </Nav.Link>
               <Nav.Link
                 onClick={() => {
-                  setView("leaderboard");
+                  setView('leaderboard');
                 }}
               >
                 High-Scores
@@ -70,7 +77,7 @@ export default function NavigationBar({
             </Nav>
             <Nav className="ms-auto">
               <NavDropdown
-                title={username ? username : "username"}
+                title={username ? username : 'username'}
                 id="basic-nav-dropdown"
                 align="end"
               >

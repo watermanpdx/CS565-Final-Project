@@ -1,24 +1,33 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import Modal from "react-bootstrap/Modal";
-import Toast from "react-bootstrap/Toast";
-import ToastContainer from "react-bootstrap/ToastContainer";
+// Login.jsx
 
-import { useState, useEffect } from "react";
+/*
+This component is responsible for handling the account login screen and
+all sub-menu login states.
+*/
 
+// dependencies ---------------------------------------------------------------
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
+
+import { useState, useEffect } from 'react';
+
+// Login definition (default export) ------------------------------------------
 export default function Login({
   show,
   setShow,
   usernameParent,
   setUsernameParent,
 }) {
-  const [view, setView] = useState("login");
+  const [view, setView] = useState('login');
   const [toast, setToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordCheck, setPasswordCheck] = useState("");
+  const [toastMessage, setToastMessage] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordCheck, setPasswordCheck] = useState('');
   const [dismissable, setDismissable] = useState(false);
 
   useEffect(() => {
@@ -30,24 +39,25 @@ export default function Login({
   const handleClose = () => {
     if (dismissable || username) {
       setShow(false);
-      setView("login");
+      setView('login');
     } else {
-      setToastMessage("User log-in required");
+      setToastMessage('User log-in required');
       setToast(true);
     }
   };
 
   const changeView = (view) => {
-    setUsername("");
-    setPassword("");
-    setPasswordCheck("");
+    setUsername('');
+    setPassword('');
+    setPasswordCheck('');
     setView(view);
   };
 
+  // called on login attempt
   const handleLogin = async () => {
-    const post = await fetch("/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const post = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
     const res = await post.json();
@@ -57,47 +67,48 @@ export default function Login({
       setUsernameParent(res.username);
       handleClose();
     } else {
-      setToastMessage("Username or password incorrect");
+      setToastMessage('Username or password incorrect');
       setToast(true);
     }
   };
 
+  // called on new-account or password-update
   const handleAccountUpdate = async (url) => {
-    if (!username || username === "") {
-      setToastMessage("Please enter a username");
+    if (!username || username === '') {
+      setToastMessage('Please enter a username');
       setToast(true);
       return false;
     }
     if (
       !password ||
-      password === "" ||
+      password === '' ||
       !passwordCheck ||
-      passwordCheck === ""
+      passwordCheck === ''
     ) {
-      setToastMessage("Please complete password fields");
+      setToastMessage('Please complete password fields');
       setToast(true);
       return false;
     }
 
     if (password === passwordCheck) {
       const post = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
       const { success } = await post.json();
       if (success) {
-        setView("login");
+        setView('login');
         return true;
       }
     } else {
-      setToastMessage("Passwords do not match");
+      setToastMessage('Passwords do not match');
       setToast(true);
       return false;
     }
 
     // Defaul failure message
-    setToastMessage("Account update failed. Please retry");
+    setToastMessage('Account update failed. Please retry');
     setToast(true);
     return false;
   };
@@ -110,7 +121,7 @@ export default function Login({
         backdrop="static"
         data-bs-theme="dark"
       >
-        {view === "login" && (
+        {view === 'login' && (
           <EnterPassword
             show={show}
             handleClose={handleClose}
@@ -120,23 +131,23 @@ export default function Login({
             changeView={changeView}
           />
         )}
-        {view === "new" && (
+        {view === 'new' && (
           <UpdateAccount
-            title={"New Account"}
+            title={'New Account'}
             setUsername={setUsername}
             setPassword1={setPassword}
             setPassword2={setPasswordCheck}
-            handleAccountUpdate={() => handleAccountUpdate("/new-account")}
+            handleAccountUpdate={() => handleAccountUpdate('/new-account')}
             changeView={changeView}
           />
         )}
-        {view === "reset" && (
+        {view === 'reset' && (
           <UpdateAccount
-            title={"Reset Password"}
+            title={'Reset Password'}
             setUsername={setUsername}
             setPassword1={setPassword}
             setPassword2={setPasswordCheck}
-            handleAccountUpdate={() => handleAccountUpdate("/password-reset")}
+            handleAccountUpdate={() => handleAccountUpdate('/password-reset')}
             changeView={changeView}
           />
         )}
@@ -144,7 +155,7 @@ export default function Login({
 
       <ToastContainer
         className="p-3"
-        position={"top-center"}
+        position={'top-center'}
         style={{ zIndex: 9999 }}
       >
         <Toast
@@ -161,6 +172,7 @@ export default function Login({
   );
 }
 
+// EnterPassword sub-component ------------------------------------------------
 function EnterPassword({
   handleClose,
   setUsername,
@@ -197,10 +209,10 @@ function EnterPassword({
         <Button variant="secondary" onClick={handleClose}>
           Cancel
         </Button>
-        <Button variant="secondary" onClick={() => changeView("new")}>
+        <Button variant="secondary" onClick={() => changeView('new')}>
           New Account
         </Button>
-        <Button variant="secondary" onClick={() => changeView("reset")}>
+        <Button variant="secondary" onClick={() => changeView('reset')}>
           Reset Password
         </Button>
         <Button variant="primary" onClick={handleLogin}>
@@ -211,6 +223,7 @@ function EnterPassword({
   );
 }
 
+// UpdateAccount sub-component ------------------------------------------------
 function UpdateAccount({
   title,
   setUsername,
@@ -252,7 +265,7 @@ function UpdateAccount({
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => changeView("login")}>
+        <Button variant="secondary" onClick={() => changeView('login')}>
           Back
         </Button>
         <Button variant="primary" onClick={handleAccountUpdate}>

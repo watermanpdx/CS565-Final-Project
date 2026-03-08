@@ -6,6 +6,8 @@ The following repository contains the implementation and documentation for the P
 
 A journal of the design process, decisions, and major commits/branches is retained within this codebase in [`docs/journal.md`](./docs/journal.md)
 
+The live site can be accessed running on the public url: [cs565-final-project-tayte-waterman.com](http://cs565-final-project-tayte-waterman.com)
+
 ### Author
 
 Tayte Waterman
@@ -16,11 +18,37 @@ Winter 2026
 
 ## Usage
 
-See [How to Run](#how-to-run) for how to launch the application.
+### Remote (Live) Access
+
+Access via: [cs565-final-project-tayte-waterman.com](http://cs565-final-project-tayte-waterman.com)
+
+### Local Execution
+
+The webpage can be run in a local environment via `Docker Compose` to orchestrate both the backend server and `PostgreSQL` database. First install a `Docker` runtime environment on your local machine ([Install Docker](https://docs.docker.com/get-started/get-docker/)). Once installed the user only needs to call `Docker Compose`. From the root project directory execute the following commands:
+
+```bash
+docker compose up --build
+```
+
+This will fetch and build the dependent docker containers, (within then) install all necessary `npm` dependencies, and start the backend and `PostgreSQL` processes, and expose the backend server port. The webpage can then be accessed via local browser at: [localhost](http://localhost/)
 
 ### Login
 
 On initial page-load, the user will be prompted to log-in. Log-in is mandatory in order to manage player scores.
+
+![login](./docs/screenshots/login.jpg)
+
+### How to Play
+
+Instructions on how to play can be accessed via the "How-to-play" link in the Navbar. During both the 1-player and 2-player modes, the Tetris game is controlled via the keyboard:
+
+#### Controls
+
+- **Move Left** - A, Left-Arrow
+- **Move Right** - D, Right-Arrow
+- **Move Down** - S, Down-Arrow
+- **Rotate Left** - Q
+- **Rotate Right** - E, Space-Bar
 
 ### 1-Player Mode
 
@@ -29,70 +57,21 @@ On initial page-load, the user will be prompted to log-in. Log-in is mandatory i
 3. Use the keyboard to control the Tetris game. Controls informatoin can be found in the "How to Play" link in the navigation banner.
 4. On game-end (assuming non-zero score) the player username and score can be seen in the "Leaderboard" page, or in the main-page summary if in the top high-scores.
 
+![1-player](./docs/screenshots/single-player.jpg)
+
 ### 2-Player Mode
 
 1. Select "2-Player" mode on the main-page.
 2. Click the "Start" button below the game-area to start a game. It will not start until a second player is available.
-3. In another tab, reopen web-page [http://localhost:3000](http://localhost:3000) and log-in.
+3. In another tab, reopen web-page [localhost](http://localhost) and log-in.
 4. Repleat steps 1 and 2 from the new tab.
 5. A 2-player game will start in real-time for both participants.
 6. On game-end (both players) the player username and score will be added to the "Leaderboard" page, or in the main-page summary if in the top high-scores.
 
-## How to Run
+![1-player](./docs/screenshots/two-player.jpg)
 
-Note: The following describes how to run the current state of the codebase. It utilizes the React development server for hosting the front-end. In future revisions the frontend contents will be fully served by the backend, however in the current state this is not yet supported.
+### High-Scores
 
-Both the frontend and backend applications must be launched independently (at this time).
+Click on the "High-Scores" link in the Navbar at the top of the sign to get to see a list of high-scores from all players.
 
-### Backend
-
-1. Install dependencies
-
-```bash
-cd backend
-npm install
-```
-
-2. Run
-
-```bash
-node src/server.js
-```
-
-3. Expected output
-
-```bash
-$ node src/server.js
-Server running at http://localhost:3001
-```
-
-### Frontend
-
-1. Install dependencies
-
-```bash
-cd frontend
-npm install
-```
-
-2. Run
-
-```bash
-npm start
-```
-
-3. Expected output
-
-```bash
-Compiled successfully!
-
-You can now view frontend in the browser.
-
-  Local:            http://localhost:3000
-  On Your Network:  http://<your ip>:3000
-
-Note that the development build is not optimized.
-To create a production build, use npm run build.
-
-webpack compiled successfully
-```
+![high-scores](./docs/screenshots/high-scores.jpg)

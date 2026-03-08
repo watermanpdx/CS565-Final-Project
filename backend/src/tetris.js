@@ -1,6 +1,12 @@
 // tetris.js
 
-const CallbackList = require("./utilities.js");
+/*
+This file contains the main Tetris game implementation as a javascript object.
+It is responsible for the core logic responsible for running a Tetris game.
+*/
+
+// dependencies ---------------------------------------------------------------
+const CallbackList = require('./utilities.js');
 
 // Global constants -----------------------------------------------------------
 const GRID_WIDTH = 10;

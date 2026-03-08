@@ -1,8 +1,15 @@
 // HowToPlay.jsx
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import Modal from "react-bootstrap/Modal";
+/*
+This component is responsible for providing the player with a basic
+how-to of game controls.
+*/
 
+// dependencies ---------------------------------------------------------------
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Modal from 'react-bootstrap/Modal';
+
+// HowToPlay definition (default export) --------------------------------------
 export default function HowToPlay({ show, setShow }) {
   const handleClose = () => setShow(false);
   return (
