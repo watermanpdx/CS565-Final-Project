@@ -53,7 +53,6 @@ initDB();
 
 // Socket.IO communication ----------------------------------------------------
 const io = new Server(server);
-
 // rooms entities for game sessions management
 const rooms = new Rooms();
 const MAX_SCORE_ENTRIES = 10000;
@@ -79,7 +78,7 @@ io.on('connection', (socket) => {
     );
 
     // connect to a room
-    room = rooms.joinRoom(username, primaryPlayer, twoPlayerMode);
+    room = rooms.joinRoom(username, twoPlayerMode);
     room.attachOnRunning(onRunning);
 
     // refresh running state to frontend
@@ -162,11 +161,11 @@ io.on('connection', (socket) => {
 
   // socket.io disconnection
   socket.on('disconnect', () => {
-    cleanupCallbacks(room, primaryGame, secondaryGame);
+    cleanupCallbacks();
   });
 
   // disconnect callbacks
-  function cleanupCallbacks(room, primaryGame, secondaryGame) {
+  function cleanupCallbacks() {
     if (primaryGame) {
       primaryGame.removeOnUpdate(onUpdate);
       primaryGame.removeOnEnd(onEnd);

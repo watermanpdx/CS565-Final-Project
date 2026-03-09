@@ -158,14 +158,14 @@ class Rooms {
     this.rooms = [];
   }
 
-  joinRoom(username, primaryPlayer, twoPlayerMode) {
+  joinRoom(username, twoPlayerMode) {
     // check if already in room
     let room = this.findActiveRoom(username, twoPlayerMode);
 
     // check for available room
     if (!room) {
       room = this.rooms.find((r) => {
-        return r.isAvailable();
+        return twoPlayerMode === r.twoPlayerMode && r.isAvailable();
       });
       if (room) {
         if (!room.hasPlayer(username)) {
