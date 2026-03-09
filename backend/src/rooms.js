@@ -44,6 +44,12 @@ class Room {
     );
   }
 
+  hasPlayer(username) {
+    return (
+      this.slot1.game.player === username || this.slot2.game.player === username
+    );
+  }
+
   registerPlayer(username) {
     let result = false;
     if (this.slot1.game.player === null) {
@@ -152,16 +158,19 @@ class Rooms {
     this.rooms = [];
   }
 
-  joinRoom(username, twoPlayerMode) {
+  joinRoom(username, primaryPlayer, twoPlayerMode) {
     // check if already in room
     let room = this.findActiveRoom(username, twoPlayerMode);
+
     // check for available room
     if (!room) {
       room = this.rooms.find((r) => {
         return r.isAvailable();
       });
       if (room) {
-        room.registerPlayer(username);
+        if (!room.hasPlayer(username)) {
+          room.registerPlayer(username);
+        }
       }
     }
     // create new room

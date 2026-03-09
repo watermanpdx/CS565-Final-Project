@@ -72,6 +72,7 @@ export default function Home({ username, gameFocus }) {
             <Tetris
               username={username}
               twoPlayerMode={mode === '2-player'}
+              primaryPlayer={true}
               focus={gameFocus}
               setNewScoreFlag={setNewScoreFlag}
             />

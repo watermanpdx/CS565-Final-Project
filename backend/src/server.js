@@ -69,6 +69,7 @@ io.on('connection', (socket) => {
 
   // new game connect event from frontend
   socket.on('game-connect', (data) => {
+    // init/re-init game variables
     username = data.username;
     const primaryPlayer = data.primaryPlayer;
     const twoPlayerMode = data.twoPlayerMode;
@@ -77,9 +78,14 @@ io.on('connection', (socket) => {
       `Connecting ${twoPlayerMode ? '2-player' : '1-player'} game for: ${username}`,
     );
 
-    room = rooms.joinRoom(username, twoPlayerMode);
+    // connect to a room
+    room = rooms.joinRoom(username, primaryPlayer, twoPlayerMode);
     room.attachOnRunning(onRunning);
 
+    // refresh running state to frontend
+    socket.emit('running-status', room.isRunning() ? 'running' : 'not-started');
+
+    // detect primary and secondary game connections and setup accordingly
     if (primaryPlayer) {
       room.attachOnPlayer(onPlayer);
       onPlayer(room);
@@ -156,6 +162,11 @@ io.on('connection', (socket) => {
 
   // socket.io disconnection
   socket.on('disconnect', () => {
+    cleanupCallbacks(room, primaryGame, secondaryGame);
+  });
+
+  // disconnect callbacks
+  function cleanupCallbacks(room, primaryGame, secondaryGame) {
     if (primaryGame) {
       primaryGame.removeOnUpdate(onUpdate);
       primaryGame.removeOnEnd(onEnd);
@@ -169,7 +180,7 @@ io.on('connection', (socket) => {
       room.removeOnPlayer(onPlayer);
       room.removeOnRunning(onRunning);
     }
-  });
+  }
 
   // communicate player status of current room
   function onPlayer() {

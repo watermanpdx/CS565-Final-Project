@@ -38,11 +38,12 @@ const BLOCK_TYPES = [
 
 // Tetris definition (default export) -----------------------------------------
 export default function Tetris({
-  username = null,
-  primaryPlayer = true,
-  twoPlayerMode = false,
-  focus = null,
-  setNewScoreFlag = null,
+  username,
+  primaryPlayer,
+  twoPlayerMode,
+  focus,
+  setNewScoreFlag,
+  onSetup,
 }) {
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
@@ -73,6 +74,10 @@ export default function Tetris({
     }
   }, [gameOver, setNewScoreFlag]);
 
+  useEffect(() => {
+    setRunning('not-started');
+  }, [twoPlayerMode]);
+
   // handle socket.io communication
   useEffect(() => {
     if (username) {
@@ -81,6 +86,9 @@ export default function Tetris({
         primaryPlayer: primaryPlayer,
         twoPlayerMode: twoPlayerMode,
       });
+      if (onSetup) {
+        onSetup();
+      }
     }
 
     function onConnect() {
