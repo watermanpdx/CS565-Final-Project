@@ -1,5 +1,12 @@
 // App.jsx
 
+/*
+This file is the main React page definition. It unites all React components
+required in this project for presentation to the user and management of
+different "pages"
+*/
+
+// dependencies ---------------------------------------------------------------
 import './App.css';
 import Home from './components/Home.jsx';
 import Leaderboard from './components/Leaderboard.jsx';
@@ -7,6 +14,7 @@ import NavigationBar from './components/NavigationBar.jsx';
 
 import { useState, useEffect } from 'react';
 
+// App definition (default export) --------------------------------------------
 export default function App() {
   const [view, setView] = useState(sessionStorage.getItem('view') || 'home');
   const [username, setUsername] = useState(

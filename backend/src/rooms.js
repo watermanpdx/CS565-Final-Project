@@ -38,7 +38,10 @@ class Room {
   }
 
   isAvailable() {
-    return this.slot1.game.player === null || this.slot2.game.player === null;
+    return (
+      this.twoPlayerMode &&
+      (this.slot1.game.player === null || this.slot2.game.player === null)
+    );
   }
 
   registerPlayer(username) {
@@ -168,7 +171,7 @@ class Rooms {
     }
 
     console.log(
-      `Room id-${room.id}, mode: ${this.twoPlayerMode ? '2-player' : '1-player'}`,
+      `Room id-${room.id}, mode: ${room.twoPlayerMode ? '2-player' : '1-player'}`,
     );
     console.log(
       `  Players: ${room.slot1.game.player}, ${room.slot2.game.player}`,
