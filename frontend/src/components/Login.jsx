@@ -23,6 +23,7 @@ export default function Login({
   setUsernameParent,
 }) {
   const [view, setView] = useState('login');
+  const [title, setTitle] = useState('Log In');
   const [toast, setToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [username, setUsername] = useState('');
@@ -51,6 +52,24 @@ export default function Login({
     setPassword('');
     setPasswordCheck('');
     setView(view);
+
+    switch (view) {
+      case 'new': {
+        setTitle('New Account');
+        break;
+      }
+
+      case 'reset': {
+        setTitle('Reset Password');
+        break;
+      }
+
+      case 'login':
+      default: {
+        setTitle('Log In');
+        break;
+      }
+    }
   };
 
   // called on login attempt
@@ -98,7 +117,7 @@ export default function Login({
       });
       const { success } = await post.json();
       if (success) {
-        setView('login');
+        changeView('login');
         return true;
       }
     } else {
@@ -120,7 +139,11 @@ export default function Login({
         onHide={handleClose}
         backdrop="static"
         data-bs-theme="dark"
+        aria-labelledby="login-modal-title"
       >
+        <Modal.Header closeButton>
+          <Modal.Title id="login-modal-title">{title}</Modal.Title>
+        </Modal.Header>
         {view === 'login' && (
           <EnterPassword
             show={show}
@@ -182,9 +205,6 @@ function EnterPassword({
 }) {
   return (
     <>
-      <Modal.Header closeButton>
-        <Modal.Title>Log In</Modal.Title>
-      </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3" controlId="formUsername">
@@ -234,9 +254,6 @@ function UpdateAccount({
 }) {
   return (
     <>
-      <Modal.Header closeButton>
-        <Modal.Title>{title}</Modal.Title>
-      </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3" controlId="formUsername">

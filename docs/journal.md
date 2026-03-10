@@ -170,6 +170,14 @@ In this update I deployed my website to a VM so that it can be accessed on the w
 
 I also attempted to go through my codebase and review it per AirBnB Design Guidelines for [JavaScript](https://github.com/airbnb/javascript) and [React](https://github.com/airbnb/javascript/tree/master/react). This proved to be rather challenging as I decided to take it on in the final review. It would have been better to pre-review and incrementally update and review throughout development. Unfortunately, I fear that at this state of my code, my code is simply too large and complex for me to mentally capture everything. I have tried to address where I can, but fear that I have not been able to capture everything. Some areas I did find and address: I found that my local Visual Studio Code Prettier config was setting all quotes to `"` instead of the recommended `'`. I added a local, overriding `.prettierrc` config to reset this to `'`. I also found that there were several areas where I had stray uses of `let` where `const` would suffice. I modularized some of the `Math()` calls into helper functions to better describe explicitly what was being done (generating random ids, random integers, etc). I also pulled many constants out of React components where they could sufficiently be described at the top of their files.
 
+## (Supplemental) Accessibility Audit
+
+In the final submission self-assessment I found that I had missed running an accessibility audit. To address, I ran an audit with [Wave](https://wave.webaim.org/) and [Lighthouse](https://chromewebstore.google.com/detail/lighthouse/blipmdconlkpinefehnmjammfjpmpbjk?pli=1). Thankfully, there were few issues to address. Wave returned no errors, and Lighthouse only returned two.
+
+The first was an issue with [aria-dialog-naming](https://dequeuniversity.com/rules/axe/4.11/aria-dialog-name) to my Login modal titles. This was addressed with the `aria-labelledby` prop referencing the `Modal.Title` id labeling it. Unfortunately, the way I structured the `Modal` with multiple `Modal.Title`s switched within it (via `{view === X && ()}`), I was unable to simply apply an id. Instead I had to pull the `Modal.Title` out of the sub-components and next to the `Modal` itself. I then created a new `[title, setTitle]` state to pass the changing titles whenever the view changed. This resolved the issue. As a small remark, in the update I found a bug in how `view` was being controlled which somehow did not previously impact performance or testing, but _this change did_. Had I not had my Jest tests in place I wouldn't have caught it!
+
+The second issue I encountered was due to contrast. There were several areas which were flagged such as button outlines and black text on gray bodies. However, I chose explicitly to not address these. For the button outlines, they are purely stylistic and the buttons themselves have high contrast (main fill) compared with the background (black). The black text on the gray Tetris window could be improved, but honestly, I chose to leave it as-is choosing the styling over the contrast recommendation. In this instance, believing the contrast is reasonably sufficient, I chose the styling over a "perfect" accessibility score.
+
 # Conclusion
 
 This project was very helpful in learning and applying fullstack web technologies. Of highlight, and the newest technologies to me personally, were socket.io, REST APIs serving through express, React, and backend database handling. With these technologies I was able to successfully implement a multi-player Tetris game rendered via React, but controlled via a backend with persistent data stored and managed within a PostgreSQL database.
@@ -257,3 +265,9 @@ Last, regarding the overall codebase itself and quality of the website, I feel t
 - Airbnb, "JavaScript Style Guide," GitHub. [Online]. Available: [https://github.com/airbnb/javascript](https://github.com/airbnb/javascript)
 
 - Airbnb, "React/JSX Style Guide," GitHub. [Online]. Available: [https://github.com/airbnb/javascript/tree/master/react](https://github.com/airbnb/javascript/tree/master/react)
+
+- "ARIA Dialog Name," Deque University. [Online]. Available: [https://dequeuniversity.com/rules/axe/4.11/aria-dialog-name](https://dequeuniversity.com/rules/axe/4.11/aria-dialog-name)
+
+- "WAVE Web Accessibility Evaluation Tools," WebAIM. [Online]. Available: [https://wave.webaim.org/](https://wave.webaim.org/)
+
+- "Lighthouse," Chrome Web Store. [Online]. Available: [https://chromewebstore.google.com/detail/lighthouse/blipmdconlkpinefehnmjammfjpmpbjk](https://chromewebstore.google.com/detail/lighthouse/blipmdconlkpinefehnmjammfjpmpbjk)
