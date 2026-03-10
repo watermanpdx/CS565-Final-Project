@@ -172,6 +172,8 @@ I also attempted to go through my codebase and review it per AirBnB Design Guide
 
 ## (Supplemental) Accessibility Audit
 
+Commit: [`1a493ee`](https://github.com/watermanpdx/CS565-Final-Project/commit/1a493eedbed24446578dec2850d987442868a09b)
+
 In the final submission self-assessment I found that I had missed running an accessibility audit. To address, I ran an audit with [Wave](https://wave.webaim.org/) and [Lighthouse](https://chromewebstore.google.com/detail/lighthouse/blipmdconlkpinefehnmjammfjpmpbjk?pli=1). Thankfully, there were few issues to address. Wave returned no errors, and Lighthouse only returned two.
 
 The first was an issue with [aria-dialog-naming](https://dequeuniversity.com/rules/axe/4.11/aria-dialog-name) to my Login modal titles. This was addressed with the `aria-labelledby` prop referencing the `Modal.Title` id labeling it. Unfortunately, the way I structured the `Modal` with multiple `Modal.Title`s switched within it (via `{view === X && ()}`), I was unable to simply apply an id. Instead I had to pull the `Modal.Title` out of the sub-components and next to the `Modal` itself. I then created a new `[title, setTitle]` state to pass the changing titles whenever the view changed. This resolved the issue. As a small remark, in the update I found a bug in how `view` was being controlled which somehow did not previously impact performance or testing, but _this change did_. Had I not had my Jest tests in place I wouldn't have caught it!
