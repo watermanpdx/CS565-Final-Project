@@ -47,11 +47,11 @@ export default function Home({ username, gameFocus }) {
     <>
       <Container className="main-contents-container m-3">
         <Row>
-          <Col lg={3} className="d-none d-lg-block">
+          <Col xs={8} lg={3}>
             <MiniLeaderboard newScoreFlag={newScoreFlag} />
             {mode === '1-player' && (
               <Button
-                className="w-100 mt-3"
+                className="w-100 my-3"
                 variant="primary"
                 onClick={togglePlayerMode}
               >
@@ -60,7 +60,7 @@ export default function Home({ username, gameFocus }) {
             )}
             {mode !== '1-player' && (
               <Button
-                className="w-100 mt-3"
+                className="w-100 my-3"
                 variant="secondary"
                 onClick={togglePlayerMode}
               >

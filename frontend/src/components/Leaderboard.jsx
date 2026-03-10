@@ -103,7 +103,7 @@ export function MiniLeaderboard({ newScoreFlag }) {
 
   return (
     <>
-      <div className="h-50" data-bs-theme="dark">
+      <div data-bs-theme="dark">
         <Card className="d-flex align-items-center justify-content-center p-1 border-0">
           <h4 className="leaderboard-title">Leaderboard</h4>
         </Card>
